@@ -20,9 +20,13 @@ subroutine routine_pouet
     norm += psi_coef_cisd_proj(i)*psi_coef_cisd_proj(i)
   enddo
   print*,'norm = ', norm
-  print*,'e_corr_cisd_proj = ', e_corr_cisd_proj
-  print*,'e_corr_cisd_proj (core) = ', e_corr_cisd_proj_cc
-  print*,'e_corr_cisd_proj (valence) = ', e_corr_cisd_proj_vv
-  print*,'e_corr_cisd_proj (core and valence) = ', e_corr_cisd_proj_cv
+
+  print*, ""
+  print*, "Correlation energy from S and D contributions decomposition:"
+  write(*,'(A25,A15)') 'From', 'Value'
+  write(*,'(A25,F15.7)') 'Core only (S and D)',        e_corr_cisd_proj_cc
+  write(*,'(A25,F15.7)') 'Valence only (S and D)',     e_corr_cisd_proj_vv
+  write(*,'(A25,F15.7)') 'Core and valence (S)',       e_corr_cisd_proj_cv
+  write(*,'(A25,F15.7)') 'Total correlation',          e_corr_cisd_proj   
 end subroutine
 

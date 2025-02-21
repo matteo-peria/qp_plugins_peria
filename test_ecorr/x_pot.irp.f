@@ -11,6 +11,7 @@ double precision function exchange_pot_kernel(r,rp)
  distance+= (r(2) - rp(2))*(r(2) - rp(2))
  distance+= (r(3) - rp(3))*(r(3) - rp(3))
  distance = dsqrt(distance)
+ !distance = dsqrt(sum((r-rp)*(r-rp)))
  integer :: i,ii
  double precision :: mos_array_r(mo_num),mos_array_rp(mo_num)
  call give_all_mos_at_r(r,mos_array_r)

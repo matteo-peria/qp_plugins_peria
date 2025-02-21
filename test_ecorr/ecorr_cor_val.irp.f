@@ -23,16 +23,19 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det_cisd_proj, (N_int,2,n_det_cisd) ]
 &BEGIN_PROVIDER [ integer, psi_core_val_decomposition, (n_det_cisd) ]
 &BEGIN_PROVIDER [ double precision, psi_coef_cisd_proj, (n_det_cisd) ]
   BEGIN_DOC
-  ! psi_det_cisd_proj, psi_coef_cisd_proj: CISD determinants in bit_kind format and their respective coefficients 
-  ! psi_core_val_decomposition: indices of CISD determinants involving either core or valence excitations 
+  ! psi_det_cisd_proj: CISD determinants in bit_kind format
+  ! psi_coef_cisd_proj: CISD determinants respective coefficients
+  ! psi_core_val_decomposition: indices of CISD determinants involving either core or valence excitations
   END_DOC
   implicit none
   integer :: i, degree, i_cisd, core_fill
-  !  
+  ! First determinant is always the HF one
   psi_det_cisd_proj(1:N_int,1:2,1) = psi_det(1:N_int,1:2,1)
+  ! First coefficient is the HF one
   psi_coef_cisd_proj(1) = psi_coef(1,1)
+  ! Initialise the decomposition to zero
   psi_core_val_decomposition = 0
-  !
+  ! Iterator on the CISD determinants
   i_cisd = 1
   ! Skip first determinant because it is the HF reference
   do i = 2, N_det
@@ -40,7 +43,7 @@ BEGIN_PROVIDER [ integer(bit_kind), psi_det_cisd_proj, (N_int,2,n_det_cisd) ]
     if (degree.le.2) then
        i_cisd += 1
        psi_det_cisd_proj(1:N_int,1:2,i_cisd) = psi_det(1:N_int,1:2,i)
-       ! Assert same number of electrons
+       ! ibits(n,i,l) get the value(s) starting in position i and ending in i+l
        core_fill = ibits(psi_det(1,1,i), 0, 1) + ibits(psi_det(1,2,i), 0, 1)
        ! core_fill = 0 --> empty core
        ! core_fill = 1 --> half empty core
@@ -75,6 +78,7 @@ BEGIN_PROVIDER [ double precision, e_corr_cisd_proj]
   !
   ! Skip first determinant because it is the HF one
   do i = 2, n_det_cisd
+  ! htilde_mu_mat_opt_bi_ortho_tot(psi_det(1,1,j), psi_det(1,1,i), N_int, htot)
     call i_H_j(ref_bitmask,psi_det_cisd_proj(1,1,i),N_int,h0i(i))
   enddo
   amplitude = psi_coef_cisd_proj/psi_coef_cisd_proj(1) 
