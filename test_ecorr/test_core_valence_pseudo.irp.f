@@ -17,8 +17,8 @@ subroutine main()
   integer :: i_ao, j_mo, i, j
   double precision :: trace
 
-!  print*, "ao_num: ", ao_num
-!  print*, "n_valence_pseudo_orb: ", n_valence_pseudo_orb
+   print*, "ao_num: ", ao_num
+   print*, "n_valence_pseudo_orb: ", n_valence_pseudo_orb
 !
 !  write(*,*) "TEST ON: mo_valence_pseudo_coef"
 !  write(*,*) "SHAPE: ", shape(mo_valence_pseudo_coef)
@@ -49,25 +49,25 @@ subroutine main()
   !!  write(*,'(100(F16.10,X))') ao_pp_valence_coef(i,:)
   !!enddo
 
-!  write(*,*)
-!  write(*,*) "TEST ON ao_pp_overlap" 
-!  write(*,*) "SHAPE: ", shape(ao_pp_overlap)
-!  trace = 0.d0
-!  do i = 1, ao_num !ao_cart_to_sphe_num !ao_num
-!    !write(*,'(100(F16.10,X))') ao_pp_overlap(i,:)
-!    trace += ao_pp_overlap(i,i)
-!  enddo
-!  write(*,*) "TRACE: ", trace
-!
-!  write(*,*)
-!  write(*,*) "TEST ON ao_pp_overlap_sphe" 
-!  write(*,*) "SHAPE: ", shape(ao_pp_overlap_sphe)
-!  trace = 0.d0
-!  do i = 1, ao_cart_to_sphe_num 
-!    !write(*,'(100(F16.10,X))') ao_pp_overlap_sphe(i,:)
-!    trace += ao_pp_overlap_sphe(i,i)
-!  enddo
-!  write(*,*) "TRACE: ", trace
+   write(*,*)
+   write(*,*) "TEST ON ao_pp_overlap" 
+   write(*,*) "SHAPE: ", shape(ao_pp_overlap)
+   trace = 0.d0
+   do i = 1, ao_num !ao_cart_to_sphe_num !ao_num
+     !write(*,'(100(F16.10,X))') ao_pp_overlap(i,:)
+     trace += ao_pp_overlap(i,i)
+   enddo
+   write(*,*) "TRACE: ", trace
+ 
+   write(*,*)
+   write(*,*) "TEST ON ao_pp_overlap_sphe" 
+   write(*,*) "SHAPE: ", shape(ao_pp_overlap_sphe)
+   trace = 0.d0
+   do i = 1, ao_cart_to_sphe_num 
+     !write(*,'(100(F16.10,X))') ao_pp_overlap_sphe(i,:)
+     trace += ao_pp_overlap_sphe(i,i)
+   enddo
+   write(*,*) "TRACE: ", trace
   
   provide mo_overlap_sphe
 

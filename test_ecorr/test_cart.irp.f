@@ -44,7 +44,7 @@ BEGIN_PROVIDER [ double precision, mo_overlap_sphe, (mo_num, mo_num)]
  accu = 0.d0
  print*,'MO OVERLAP'
  do i = 1, mo_num
-  write(*,'(100(F16.10,X))') mo_overlap_sphe(:,i)
+! write(*,'(100(F16.10,X))') mo_overlap_sphe(:,i)
   do j = 1, mo_num
    accu += dabs( mo_overlap_sphe(j,i) - mo_overlap(j,i))
   enddo
