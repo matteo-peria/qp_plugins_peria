@@ -57,6 +57,7 @@ subroutine main()
   enddo
 
   diag_overlap = 0.d0
+  diag_sum = 0.d0
   do i_ao = 1, ao_num
     print*, "ao_overlap(i_ao,i_ao)", ao_overlap(i_ao,i_ao)
     diag_overlap(i_ao) = ao_overlap(i_ao,i_ao)

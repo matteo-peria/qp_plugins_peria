@@ -83,10 +83,12 @@ BEGIN_PROVIDER [ double precision, e_corr_cisd_proj]
   enddo
   amplitude = psi_coef_cisd_proj/psi_coef_cisd_proj(1) 
   ! Mask to separate core, valence and core+valence contributions
-  ! Fortran conversion from logical to integer is: .false.-->0, .true.-->-1, hence the prefactor -1
-  mask_cc = -1*((psi_core_val_decomposition .eq. 1).or.(psi_core_val_decomposition .eq. 3))
-  mask_vv = -1*((psi_core_val_decomposition .eq. 2).or.(psi_core_val_decomposition .eq. 5))
-  mask_cv = -1*(psi_core_val_decomposition .eq. 4)
+  ! ifort conversion from logical to integer is:    .false.-->0, .true.-->-1
+  ! gfortran conversion from logical to integer is: .false.-->0, .true.-->1
+  ! for this reason we consider the absolute value of the logical value
+  mask_cc = abs((psi_core_val_decomposition .eq. 1).or.(psi_core_val_decomposition .eq. 3))
+  mask_vv = abs((psi_core_val_decomposition .eq. 2).or.(psi_core_val_decomposition .eq. 5))
+  mask_cv = abs(psi_core_val_decomposition .eq. 4)
   ! CISD correlation energy decomposition and total
   e_corr_cisd_proj_cc = sum(amplitude*h0i*mask_cc)
   e_corr_cisd_proj_vv = sum(amplitude*h0i*mask_vv)
