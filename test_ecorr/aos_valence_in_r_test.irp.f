@@ -61,10 +61,10 @@ subroutine give_all_aos_val_at_r(r, tmp_array)
       dy2 = dy**p_ao(2)
       dz2 = dz**p_ao(3)
       tmp_array(k) = 0.d0
-      do l = 1, ao_pp_prim_num(k)
-        beta = ao_pp_expo_transp_per_nucl(l,j,i)
+      do l = 1, ao_val_prim_num(k)
+        beta = ao_val_prim_expo_transp_per_nucl(l,j,i)
         if(beta*r2.gt.50.d0) cycle
-        tmp_array(k) += ao_pp_coef_normalized_transp_per_nucl(l,j,i) * dexp(-beta*r2)
+        tmp_array(k) += ao_val_prim_coef_normed_transp_per_nucl(l,j,i) * dexp(-beta*r2)
       enddo
       tmp_array(k) = tmp_array(k) * dx2 * dy2 * dz2
     enddo

@@ -65,29 +65,60 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [ double precision, ao_val_overlap_sphe_eigvec_coef, (ao_sphe_num, ao_sphe_num) ]
+&BEGIN_PROVIDER [ double precision, ao_val_overlap_sphe_eigvec_coef_transp, (ao_sphe_num, ao_sphe_num) ]
   implicit none
   BEGIN_DOC
   ! Coefficients of the eigenvectors of the overlap matrix (on the basis of 
   ! valence-projected AOs) developed on the spherical basis 
   END_DOC
+  !
   call get_AB_prod(ao_val_coef_sphe, ao_sphe_num, ao_sphe_num, &
                    ao_val_overlap_sphe_eigvec, ao_sphe_num,    &
                    ao_val_overlap_sphe_eigvec_coef             &
   )
+  ! Compute transpose
+  integer :: i,j
+  do i = 1,ao_sphe_num
+    do j = 1,ao_sphe_num
+      ao_val_overlap_sphe_eigvec_coef_transp(j,i) = ao_val_overlap_sphe_eigvec_coef(i,j)
+    enddo
+  enddo
+
  END_PROVIDER 
 
 
- BEGIN_PROVIDER [ double precision, ao_val_overlap_sphe_evec_overlap, (ao_sphe_num, ao_sphe_num) ]
+ BEGIN_PROVIDER [ double precision, ao_val_overlap_sphe_eigvec_overlap, (ao_sphe_num, ao_sphe_num) ]
   implicit none
   BEGIN_DOC
-  ! Overlap between the eigenvectors of the overlap matrix on the spherical basis
+  ! asdf
   END_DOC
-  call ao_sphe_to_ao_val_eigvec_sphe(ao_cart_to_sphe_overlap,          &
-                                     ao_sphe_num,                      &
-                                     ao_val_overlap_sphe_evec_overlap, &
-                                     ao_sphe_num                       &
+  double precision, dimension(ao_sphe_num,ao_sphe_num) :: SSCCtS
+  call get_AB_prod(                                     &
+      ao_cart_to_sphe_overlap,ao_sphe_num,ao_sphe_num,  &
+      ao_val_overlap_sphe_eigvec_coef, &
+      ao_sphe_num,                     &
+      SSCCtS                                            &
+  )
+  call get_AB_prod(                                    & 
+      ao_val_overlap_sphe_eigvec_coef_transp,         &
+      ao_sphe_num,ao_sphe_num, &
+      SSCCtS,ao_sphe_num,                              &
+      ao_val_overlap_sphe                              &
   )
  END_PROVIDER 
+
+
+! BEGIN_PROVIDER [ double precision, ao_val_overlap_sphe_evec_overlap_as_matprod, (ao_sphe_num, ao_sphe_num) ]
+!  implicit none
+!  BEGIN_DOC
+!  ! Overlap between the eigenvectors of the overlap matrix on the spherical basis
+!  END_DOC
+!  call ao_sphe_to_ao_val_eigvec_sphe(ao_cart_to_sphe_overlap,          &
+!                                     ao_sphe_num,                      &
+!                                     ao_val_overlap_sphe_evec_overlap, &
+!                                     ao_sphe_num                       &
+!  )
+! END_PROVIDER 
 
 
 subroutine ao_sphe_to_ao_val_eigvec_sphe(A_ao_sphe,LDA_ao_sphe,A_ao_val_eigvec_sphe,LDA_ao_val_eigvec_sphe)

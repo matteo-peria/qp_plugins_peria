@@ -8,9 +8,19 @@
   ! mo_core_coef(i,j) = coefficient of the i-th |AO| on the jth core |MO|
   ! mo_val_coef(i,j) = coefficient of the i-th |AO| on the jth valence |MO|
   END_DOC
+  integer :: i
 
-  mo_core_coef = mo_coef(:,list_core_pseudo)
-  mo_val_coef = mo_coef(:,list_valence_pseudo)  
+  !mo_core_coef = mo_coef(:,list_core_pseudo)
+  !mo_val_coef = mo_coef(:,list_valence_pseudo)  
+
+  do i=1, n_core_pseudo_orb
+    mo_core_coef(:,i) = mo_coef(:,list_core_pseudo(i))  
+  end do
+
+
+  do i=1, n_valence_pseudo_orb
+    mo_val_coef(:,i) = mo_coef(:,list_valence_pseudo(i))  
+  end do
 
   ! Normalization
   integer :: col

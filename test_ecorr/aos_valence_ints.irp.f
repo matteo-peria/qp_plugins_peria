@@ -27,7 +27,7 @@ BEGIN_PROVIDER [ double precision, ao_val_integrals_ne, (ao_num,ao_num)]
         !$OMP DEFAULT (NONE)                                         &
         !$OMP PRIVATE (i,j,k,l,m,alpha,beta,A_center,B_center,C_center,power_A,power_B,&
         !$OMP          num_A,num_B,Z,c,c1,n_pt_in)                      &
-        !$OMP SHARED (ao_num,ao_pp_prim_num,ao_pp_expo_transp,ao_power,ao_nucl,nucl_coord,ao_pp_coef_normalized_transp,&
+        !$OMP SHARED (ao_num,ao_val_prim_num,ao_val_prim_expo_transp,ao_power,ao_nucl,nucl_coord,ao_val_prim_coef_normed_transp,&
         !$OMP         n_pt_max_integrals,ao_val_integrals_ne,nucl_num,nucl_charge)
 
     n_pt_in = n_pt_max_integrals
@@ -44,11 +44,11 @@ BEGIN_PROVIDER [ double precision, ao_val_integrals_ne, (ao_num,ao_num)]
         power_B(1:3)= ao_power(i,1:3)
         B_center(1:3) = nucl_coord(num_B,1:3)
 
-        do l=1,ao_pp_prim_num(j)
-          alpha = ao_pp_expo_transp(l,j)
+        do l=1,ao_val_prim_num(j)
+          alpha = ao_val_prim_expo_transp(l,j)
 
-          do m=1,ao_pp_prim_num(i)
-            beta = ao_pp_expo_transp(m,i)
+          do m=1,ao_val_prim_num(i)
+            beta = ao_val_prim_expo_transp(m,i)
 
             double precision :: c, c1
             c = 0.d0
@@ -62,8 +62,8 @@ BEGIN_PROVIDER [ double precision, ao_val_integrals_ne, (ao_num,ao_num)]
               c = c - Z * c1
             enddo
             ao_val_integrals_ne(i,j) = ao_val_integrals_ne(i,j) &
-                + ao_pp_coef_normalized_transp(l,j)             &
-                * ao_pp_coef_normalized_transp(m,i) * c
+                + ao_val_prim_coef_normed_transp(l,j)             &
+                * ao_val_prim_coef_normed_transp(m,i) * c
           enddo
         enddo
       enddo
