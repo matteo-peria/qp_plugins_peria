@@ -1,3 +1,43 @@
+ BEGIN_PROVIDER [integer, n_points_radial_grid_adapt]
+&BEGIN_PROVIDER [integer, n_points_integration_angular_adapt]
+
+  BEGIN_DOC
+  ! n_points_radial_grid_adapt = number of radial grid points per atom
+  !
+  ! n_points_integration_angular_adapt = number of angular grid points per atom
+  !
+  ! These numbers are automatically set by setting the grid_adapt_type_sgn parameter
+  END_DOC
+ 
+  implicit none
+
+  if(.not. my_grid_adapt) then
+!        n_points_radial_grid_adapt = 23
+!        n_points_integration_angular_adapt = 146
+!      case(1)
+        n_points_radial_grid_adapt = 50
+        n_points_integration_angular_adapt = 194
+!      case(2)
+!        n_points_radial_grid_adapt = 30
+!        n_points_integration_angular_adapt = 194
+!      case(3)
+!        n_points_radial_grid_adapt = 99
+!        n_points_integration_angular_adapt = 590
+!      case default
+!        write(*,*) '!!! Quadrature grid not available !!!'
+!        stop
+!    end select
+  else
+    n_points_radial_grid_adapt = my_n_pt_r_grid_adapt
+    n_points_integration_angular_adapt = my_n_pt_a_grid_adapt
+  endif
+
+  print*, " n_points_radial_grid_adapt         = ", n_points_radial_grid_adapt
+  print*, " n_points_integration_angular_adapt = ", n_points_integration_angular_adapt
+
+END_PROVIDER
+
+
 subroutine give_adapt_grid_at_r(r_input, grid_points, final_adapt_weights,n_atoms_max)
  implicit none
  BEGIN_DOC
@@ -21,12 +61,6 @@ subroutine give_adapt_grid_at_r(r_input, grid_points, final_adapt_weights,n_atom
 
 !! determines the alpha averaged based on the distance
  call get_info_at_r_adapt_grid(r_input,alpha_av,radii_ua_av,slater_inter_per_atom)
- print*,'alpha_av    = ',alpha_av
- print*,'radii_ua_av = ',radii_ua_av
- print*,'slater_inter_per_atom'
- do i = 1, nucl_num
-  print*,slater_inter_per_atom(i)
- enddo
  call get_all_points_at_r_adapt_grid(r_input,alpha_av,grid_points)
  call get_voronoi_partition(r_input,grid_points,slater_inter_per_atom,weight_tmp)
 
@@ -74,49 +108,10 @@ end
 
 ! ---
 
- BEGIN_PROVIDER [integer, n_points_radial_grid_adapt]
-&BEGIN_PROVIDER [integer, n_points_integration_angular_adapt]
-
-  BEGIN_DOC
-  ! n_points_radial_grid_adapt = number of radial grid points per atom
-  !
-  ! n_points_integration_angular_adapt = number of angular grid points per atom
-  !
-  ! These numbers are automatically set by setting the grid_adapt_type_sgn parameter
-  END_DOC
- 
-  implicit none
-
-!  if(.not. my_grid_adapt_becke) then
-        n_points_radial_grid_adapt = 23
-        n_points_integration_angular_adapt = 146
-!      case(1)
-!        n_points_radial_grid_adapt = 30
-!        n_points_integration_angular_adapt = 194
-!      case(2)
-!        n_points_radial_grid_adapt = 30
-!        n_points_integration_angular_adapt = 194
-!      case(3)
-!        n_points_radial_grid_adapt = 99
-!        n_points_integration_angular_adapt = 590
-!      case default
-!        write(*,*) '!!! Quadrature grid not available !!!'
-!        stop
-!    end select
-!  else
-!    n_points_radial_grid_adapt         = my_n_pt_r_grid_adapt
-!    n_points_integration_angular_adapt = my_n_pt_a_grid_adapt
-!  endif
-
-  print*, " n_points_radial_grid_adapt         = ", n_points_radial_grid_adapt
-  print*, " n_points_integration_angular_adapt = ", n_points_integration_angular_adapt
-
-END_PROVIDER
-
 ! ---
 BEGIN_PROVIDER [integer, n_total_adapt_grid]
  implicit none
- n_total_adapt_grid = n_points_grid_adapt_per_atom + n_points_integration_angular_adapt * n_points_radial_grid_adapt
+ n_total_adapt_grid = n_points_grid_adapt_per_atom*(nucl_num+1) 
 END_PROVIDER 
 
 BEGIN_PROVIDER [integer, n_points_grid_adapt_per_atom]

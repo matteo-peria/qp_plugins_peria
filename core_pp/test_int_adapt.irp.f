@@ -37,10 +37,10 @@ program test
    enddo
   enddo
  enddo
- print*,'integral_1 = '
- do i_ao = 1, ao_num
-  write(*,'(100(F16.10,X))')integral_1(i_ao,:)
- enddo
+! print*,'integral_1 = '
+! do i_ao = 1, ao_num
+!  write(*,'(100(F16.10,X))')integral_1(i_ao,:)
+! enddo
 
  integral_2 = 0.d0
  integer :: i_nucl, n_atoms_max
@@ -68,16 +68,16 @@ program test
   enddo
  enddo
 
- print*,'integral_2 = '
- do i_ao = 1, ao_num
-  write(*,'(100(F16.10,X))')integral_2(i_ao,:)
- enddo
+! print*,'integral_2 = '
+! do i_ao = 1, ao_num
+!  write(*,'(100(F16.10,X))')integral_2(i_ao,:)
+! enddo
  mu = 100000000.d0
  call give_all_erf_kl_ao(integrals_ao,mu,center)
- print*,'integrals_ao = '
- do i_ao = 1, ao_num
-  write(*,'(100(F16.10,X))')integrals_ao(i_ao,:)
- enddo
+! print*,'integrals_ao = '
+! do i_ao = 1, ao_num
+!  write(*,'(100(F16.10,X))')integrals_ao(i_ao,:)
+! enddo
  double precision :: accu_1, accu_2
  accu_1 = 0.d0
  accu_2 = 0.d0
@@ -88,6 +88,8 @@ program test
   enddo
  enddo
 
+ print*,'n_total_adapt_grid = ',n_total_adapt_grid
+ print*,'n_points_final_grid= ',n_points_final_grid
  print*,'accu_1 = ',accu_1
  print*,'accu_2 = ',accu_2
 

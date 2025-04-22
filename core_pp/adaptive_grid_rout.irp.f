@@ -23,9 +23,7 @@
  
  double precision :: xhi_tmp,u_ij
  !! determines the slater_inter distance radii for each atoms with respect to r_input
- print*,'inside'
  do j = 1, nucl_num
-  print*,radii_ua_av,slater_bragg_radii_per_atom_ua(j)
   xhi_tmp = radii_ua_av / slater_bragg_radii_per_atom_ua(j)
   u_ij = (xhi_tmp - 1.d0 ) / (xhi_tmp +1.d0)
   slater_inter_per_atom(j) = u_ij  / (u_ij * u_ij - 1.d0)
