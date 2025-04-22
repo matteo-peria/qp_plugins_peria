@@ -23,7 +23,9 @@
  
  double precision :: xhi_tmp,u_ij
  !! determines the slater_inter distance radii for each atoms with respect to r_input
+ print*,'inside'
  do j = 1, nucl_num
+  print*,radii_ua_av,slater_bragg_radii_per_atom_ua(j)
   xhi_tmp = radii_ua_av / slater_bragg_radii_per_atom_ua(j)
   u_ij = (xhi_tmp - 1.d0 ) / (xhi_tmp +1.d0)
   slater_inter_per_atom(j) = u_ij  / (u_ij * u_ij - 1.d0)
@@ -42,7 +44,7 @@ subroutine get_all_points_at_r_adapt_grid(r_input,alpha_av,grid_points)
  ! subroutine that returns all grid points with respect to r_input, with the first spherical grid centered around r_input
  END_DOC
  double precision, intent(in)  :: r_input(3),alpha_av
- double precision, intent(out) :: grid_points(3,n_points_angular_grid_adapt,n_points_radial_grid_adapt,nucl_num+1)
+ double precision, intent(out) :: grid_points(3,n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
  integer :: i_nucl,j,k
  double precision :: x_ref,y_ref,z_ref,x,r,knowles_function
 !! fills the array of points with first the points centered on r_input
@@ -58,10 +60,10 @@ subroutine get_all_points_at_r_adapt_grid(r_input,alpha_av,grid_points)
    r = knowles_function(alpha_av, m_knowles, x)
 
    ! explicit values of the grid points centered around each atom
-   do k = 1, n_points_angular_grid_adapt
-     grid_points(1,k,j,i_nucl) = x_ref + angular_quadrature_points(k,1) * r
-     grid_points(2,k,j,i_nucl) = y_ref + angular_quadrature_points(k,2) * r
-     grid_points(3,k,j,i_nucl) = z_ref + angular_quadrature_points(k,3) * r
+   do k = 1, n_points_integration_angular_adapt
+     grid_points(1,k,j,i_nucl) = x_ref + angular_adapt_quadrature_points(k,1) * r
+     grid_points(2,k,j,i_nucl) = y_ref + angular_adapt_quadrature_points(k,2) * r
+     grid_points(3,k,j,i_nucl) = z_ref + angular_adapt_quadrature_points(k,3) * r
    enddo
  enddo
 !! then fills the rest of the grid 
@@ -76,10 +78,10 @@ subroutine get_all_points_at_r_adapt_grid(r_input,alpha_av,grid_points)
      r = knowles_function(alpha_knowles(grid_atomic_number(i_nucl)), m_knowles, x)
 
      ! explicit values of the grid points centered around each atom
-     do k = 1, n_points_angular_grid_adapt
-       grid_points(1,k,j,i_nucl+1) = x_ref + angular_quadrature_points(k,1) * r
-       grid_points(2,k,j,i_nucl+1) = y_ref + angular_quadrature_points(k,2) * r
-       grid_points(3,k,j,i_nucl+1) = z_ref + angular_quadrature_points(k,3) * r
+     do k = 1, n_points_integration_angular_adapt
+       grid_points(1,k,j,i_nucl+1) = x_ref + angular_adapt_quadrature_points(k,1) * r
+       grid_points(2,k,j,i_nucl+1) = y_ref + angular_adapt_quadrature_points(k,2) * r
+       grid_points(3,k,j,i_nucl+1) = z_ref + angular_adapt_quadrature_points(k,3) * r
      enddo
    enddo
  enddo
@@ -234,9 +236,9 @@ subroutine get_voronoi_partition(r_input,grid_points,slater_inter_per_input,weig
  !
  ! where the voronoi partition is made of nucl_num atoms + 1 extra atom at r_input and characterized by slater_inter_per_input
  END_DOC
- double precision, intent(in) :: r_input(3),grid_points(3,n_points_angular_grid_adapt,n_points_radial_grid_adapt,nucl_num)
+ double precision, intent(in) :: r_input(3),grid_points(3,n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
  double precision, intent(in) :: slater_inter_per_input(nucl_num)
- double precision, intent(out):: weight_tmp(n_points_angular_grid_adapt,n_points_radial_grid_adapt,nucl_num)
+ double precision, intent(out):: weight_tmp(n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
  integer :: i_nucl,k,l
  double precision :: r(3),weights_per_atom(nucl_num+1)
   ! run over all points in space
@@ -245,7 +247,7 @@ subroutine get_voronoi_partition(r_input,grid_points,slater_inter_per_input,weig
     !for each radial grid attached to the "jth" atom
     do k = 1, n_points_radial_grid_adapt -1
       ! for each angular point attached to the "jth" atom
-      do l = 1, n_points_angular_grid_adapt
+      do l = 1, n_points_integration_angular_adapt
         r(1) = grid_points(1,l,k,i_nucl+1)
         r(2) = grid_points(2,l,k,i_nucl+1)
         r(3) = grid_points(3,l,k,i_nucl+1)
@@ -261,7 +263,7 @@ subroutine get_voronoi_partition(r_input,grid_points,slater_inter_per_input,weig
     !for each radial grid attached to the "jth" atom
     do k = 1, n_points_radial_grid_adapt -1
       ! for each angular point attached to the "jth" atom
-      do l = 1, n_points_angular_grid_adapt
+      do l = 1, n_points_integration_angular_adapt
         r(1) = grid_points(1,l,k,i_nucl)
         r(2) = grid_points(2,l,k,i_nucl)
         r(3) = grid_points(3,l,k,i_nucl)
