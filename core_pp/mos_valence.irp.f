@@ -174,8 +174,7 @@ END_PROVIDER
    ! List of MO indices which are in the core_pseudo and valence_pseudo.
    END_DOC
    integer :: i_mo, i_core_pseudo, i_valence_pseudo
-   !
-   print*, 'IM COMPUTING VARIOUS LISTS'
+   
    list_core_pseudo = 0
    list_core_pseudo_reverse = 0
    list_valence_pseudo = 0
@@ -192,7 +191,6 @@ END_PROVIDER
    if(.true.)then
      i_core_pseudo=0
      i_valence_pseudo=0
-     print*, "MO_NUM", mo_num
      do i_mo = 1, mo_num
        !if(mo_class(i) == 'core_pseudo')then ! In future version there will be an appropriate label for the core of PP
        if(mo_class(i_mo) == 'Core')then

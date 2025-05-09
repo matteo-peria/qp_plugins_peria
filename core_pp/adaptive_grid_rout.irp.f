@@ -1,3 +1,85 @@
+subroutine give_adapt_grid_at_r(r_input, grid_points, final_adapt_weights)
+ implicit none
+ BEGIN_DOC
+ !
+ ! grid_points(1:3,i,j,k) where the indices are
+ ! = x/y/z for the ith angular, jth radial points attached to the kth atom
+ ! 
+ ! but we add an extra atom corresponding, LOCATED FIRST in the list, located at r_input
+ !
+ ! NB: this is the old adaptive grid where the number of points on the moving
+ ! grid is the same as the extra grid. In order to make a subroutine that allow
+ ! for real different treatment of floting (moving) and fixed extra grid,
+ ! in this subroutine I adopt GRID_POINTS_EXTRA_RADIAL and 
+ ! DR_RADIAL_EXTRA_INTEGRAL as points and integral-bin-width even for the
+ ! adaptive grid
+ !
+ !
+ END_DOC
+ double precision, intent(in) :: r_input(3)
+ !
+ double precision, intent(out):: grid_points(3,n_points_ang_extra_grid, &
+                                           & n_points_rad_extra_grid,   &
+                                           & nucl_num+1)
+ double precision, intent(out):: final_adapt_weights(n_points_ang_extra_grid, &
+                                                   & n_points_rad_extra_grid, &
+                                                   & nucl_num+1)
+ !
+ double precision :: alpha_av,radii_ua_av,slater_inter_per_atom(nucl_num)
+ double precision :: weight_tmp(n_points_ang_extra_grid, &
+                              & n_points_rad_extra_grid, &
+                              & nucl_num+1)
+ double precision :: weights_per_atom(nucl_num+1)
+ double precision :: norm, x
+ double precision :: derivative_knowles_function, knowles_function, contrib_integration
+
+ integer :: i,k,i_nucl
+
+ call get_info_at_r_adapt_grid(r_input,alpha_av,radii_ua_av,slater_inter_per_atom)
+ call get_all_points_at_r_adapt_grid(r_input,alpha_av,grid_points)
+ call get_voronoi_partition(r_input,grid_points,slater_inter_per_atom,weight_tmp)
+
+ ! Set the extra atom portion of the grid (corresponding to 1st entry)
+ i_nucl = 1
+ do i = 1, n_points_rad_extra_grid-1
+   !x = grid_adapt_points_radial(i)  ! See NB
+   x = grid_points_extra_radial(i)
+   do k = 1, n_points_ang_extra_grid
+     contrib_integration = derivative_knowles_function(alpha_av, m_knowles, x) &
+                         * knowles_function(alpha_av, m_knowles, x)**2
+     !final_adapt_weights(k,i,i_nucl) = weights_angular_adapt_points(k) & ! See NB
+     final_adapt_weights(k,i,i_nucl) = weights_angular_points_extra(k) &
+                                     & *weight_tmp(k,i,i_nucl)         &
+                                     & *contrib_integration            &
+                                     !& *dr_adapt_radial_integral ! See NB
+                                     & *dr_radial_extra_integral
+   enddo
+ enddo
+ 
+ ! Set all the remaining real atoms portions of the grid (starting from the 2nd)
+ do i_nucl = 2, nucl_num+1
+   do i = 1, n_points_rad_extra_grid-1
+     !x = grid_adapt_points_radial(i) ! See NB
+     x = grid_points_extra_radial(i)
+     do k = 1, n_points_ang_extra_grid
+       contrib_integration = &
+           & derivative_knowles_function(alpha_knowles(grid_atomic_number(i_nucl-1)), m_knowles, x) &
+           & * knowles_function(alpha_knowles(grid_atomic_number(i_nucl-1)), m_knowles, x)**2
+       
+       !final_adapt_weights(k,i,i_nucl) = weights_angular_adapt_points(k) & ! See NB
+       final_adapt_weights(k,i,i_nucl) = weights_angular_points_extra(k) &
+                                      & *weight_tmp(k,i,i_nucl)          &
+                                      & *contrib_integration             &
+                                      !& *dr_adapt_radial_integral
+                                      & *dr_radial_extra_integral
+     enddo
+   enddo
+ enddo
+
+end subroutine
+
+
+
  subroutine get_info_at_r_adapt_grid(r_input,alpha_av,radii_ua_av,slater_inter_per_atom)
  implicit none
  double precision, intent(in) :: r_input(3)
@@ -36,61 +118,79 @@
 
  end
 
+
 subroutine get_all_points_at_r_adapt_grid(r_input,alpha_av,grid_points)
- implicit none
- BEGIN_DOC
- ! subroutine that returns all grid points with respect to r_input, with the first spherical grid centered around r_input
- END_DOC
- double precision, intent(in)  :: r_input(3),alpha_av
- double precision, intent(out) :: grid_points(3,n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
- integer :: i_nucl,j,k
- double precision :: x_ref,y_ref,z_ref,x,r,knowles_function
-!! fills the array of points with first the points centered on r_input
- i_nucl = 1
- !
- x_ref = r_input(1)
- y_ref = r_input(2)
- z_ref = r_input(3)
- do j = 1, n_points_radial_grid_adapt-1
-   ! x value for the mapping of the [0, +\infty] to [0,1]
-   x = grid_adapt_points_radial(j)
-   ! value of the radial coordinate for the integration
-   r = knowles_function(alpha_av, m_knowles, x)
+  implicit none
+  BEGIN_DOC
+  ! subroutine that returns all grid points with respect to r_input, 
+  ! with the first spherical grid centered around r_input
+  END_DOC
+  double precision, intent(in)  :: r_input(3),alpha_av
+  !double precision, intent(out) :: grid_points(3,n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
+  double precision, intent(out) :: grid_points(3,n_points_extra_integration_angular,& 
+                                             & n_points_extra_radial_grid, &
+                                             & nucl_num+1)
+  integer :: i_nucl,j,k
+  double precision :: x_ref,y_ref,z_ref,x,r,knowles_function
+  !
+  ! First fill the array of points with first the points centered on r_input
+  i_nucl = 1
+  !
+  x_ref = r_input(1)
+  y_ref = r_input(2)
+  z_ref = r_input(3)
 
-   ! explicit values of the grid points centered around each atom
-   do k = 1, n_points_integration_angular_adapt
-     grid_points(1,k,j,i_nucl) = x_ref + angular_adapt_quadrature_points(k,1) * r
-     grid_points(2,k,j,i_nucl) = y_ref + angular_adapt_quadrature_points(k,2) * r
-     grid_points(3,k,j,i_nucl) = z_ref + angular_adapt_quadrature_points(k,3) * r
-   enddo
- enddo
-!! then fills the rest of the grid 
- do i_nucl = 1, nucl_num
-   x_ref = nucl_coord(i_nucl,1)
-   y_ref = nucl_coord(i_nucl,2)
-   z_ref = nucl_coord(i_nucl,3)
-   do j = 1, n_points_radial_grid_adapt-1
-     ! x value for the mapping of the [0, +\infty] to [0,1]
-     x = grid_adapt_points_radial(j)
-     ! value of the radial coordinate for the integration
-     r = knowles_function(alpha_knowles(grid_atomic_number(i_nucl)), m_knowles, x)
+  ! Loop over all the radial points
+  !do j = 1, n_points_radial_grid_adapt-1
+  do j = 1, n_points_extra_radial_grid-1
+    !x = grid_adapt_points_radial(j)
+    x = grid_points_extra_radial(j)
+    r = knowles_function(alpha_av, m_knowles, x)
+    ! Loop over all the angular points at fixed R
+    !do k = 1, n_points_integration_angular_adapt
+    do k = 1, n_points_extra_integration_angular
+      !grid_points(1,k,j,i_nucl) = x_ref + angular_adapt_quadrature_points(k,1) * r
+      !grid_points(2,k,j,i_nucl) = y_ref + angular_adapt_quadrature_points(k,2) * r
+      !grid_points(3,k,j,i_nucl) = z_ref + angular_adapt_quadrature_points(k,3) * r
+      grid_points(1,k,j,i_nucl) = x_ref + angular_quadrature_points_extra(k,1) * r
+      grid_points(2,k,j,i_nucl) = y_ref + angular_quadrature_points_extra(k,2) * r
+      grid_points(3,k,j,i_nucl) = z_ref + angular_quadrature_points_extra(k,3) * r
+    enddo
+  enddo
+  !
+  ! Then fills the rest of the grid 
+  do i_nucl = 1, nucl_num
+    x_ref = nucl_coord(i_nucl,1)
+    y_ref = nucl_coord(i_nucl,2)
+    z_ref = nucl_coord(i_nucl,3)
+    !do j = 1, n_points_radial_grid_adapt-1
+    do j = 1, n_points_extra_radial_grid-1
+      ! x value for the mapping of the [0, +\infty] to [0,1]
+      !x = grid_adapt_points_radial(j)
+      x = grid_points_extra_radial(j)
+      ! value of the radial coordinate for the integration
+      r = knowles_function(alpha_knowles(grid_atomic_number(i_nucl)), m_knowles, x)
 
-     ! explicit values of the grid points centered around each atom
-     do k = 1, n_points_integration_angular_adapt
-       grid_points(1,k,j,i_nucl+1) = x_ref + angular_adapt_quadrature_points(k,1) * r
-       grid_points(2,k,j,i_nucl+1) = y_ref + angular_adapt_quadrature_points(k,2) * r
-       grid_points(3,k,j,i_nucl+1) = z_ref + angular_adapt_quadrature_points(k,3) * r
-     enddo
-   enddo
- enddo
+      ! explicit values of the grid points centered around each atom
+      !do k = 1, n_points_integration_angular_adapt
+      do k = 1, n_points_extra_integration_angular
+        !grid_points(1,k,j,i_nucl+1) = x_ref + angular_adapt_quadrature_points(k,1) * r
+        !grid_points(2,k,j,i_nucl+1) = y_ref + angular_adapt_quadrature_points(k,2) * r
+        !grid_points(3,k,j,i_nucl+1) = z_ref + angular_adapt_quadrature_points(k,3) * r
+        grid_points(1,k,j,i_nucl+1) = x_ref + angular_quadrature_points_extra(k,1) * r
+        grid_points(2,k,j,i_nucl+1) = y_ref + angular_quadrature_points_extra(k,2) * r
+        grid_points(3,k,j,i_nucl+1) = z_ref + angular_quadrature_points_extra(k,3) * r
 
-end
+      enddo
+    enddo
+  enddo
+end subroutine
+
 
 double precision function cell_function_becke_general_adapt(r, atom_number, r_input,slater_inter_per_input)
   BEGIN_DOC
   ! 
-  ! General becke function for a list of atom supplied with an extra atom located at "r_input"
-  !
+  ! General Becke function for a list of atom supplied with an extra atom located at "r_input"
   ! and whose slater ratio slater_inter_per_input(i_nucl) is known for each nucl "i_nucl"
   ! 
   ! See Becke (1988, JCP,88(4))
@@ -105,12 +205,14 @@ double precision function cell_function_becke_general_adapt(r, atom_number, r_in
   double precision             :: mu_ij, nu_ij
   double precision             :: distance_i, distance_j, step_function_becke
 
+  ! Distance of the point r from the nucleus belonging to the same Voronoi cell
   distance_i  = (r(1) - nucl_coord_transp(1,atom_number) ) * (r(1) - nucl_coord_transp(1,atom_number))
   distance_i += (r(2) - nucl_coord_transp(2,atom_number) ) * (r(2) - nucl_coord_transp(2,atom_number))
   distance_i += (r(3) - nucl_coord_transp(3,atom_number) ) * (r(3) - nucl_coord_transp(3,atom_number))
   distance_i  = dsqrt(distance_i)
 
   cell_function_becke_general_adapt = 1.d0
+  ! Loop for the contributes coming from all atoms' Voronoi cell
   do j = 1, nucl_num
     if(j==atom_number) cycle
 
@@ -123,8 +225,11 @@ double precision function cell_function_becke_general_adapt(r, atom_number, r_in
     nu_ij = mu_ij + slater_bragg_type_inter_distance_ua(atom_number,j) * (1.d0 - mu_ij*mu_ij)
 
     cell_function_becke_general_adapt *= step_function_becke(nu_ij)
+
+    write(*,'(I4,100E13.4)'), j, distance_j, mu_ij, nu_ij, cell_function_becke_general_adapt
   enddo
 
+  ! Contribute coming from the extra atom
   distance_j  = (r(1) - r_input(1) ) * (r(1) - r_input(1))
   distance_j += (r(2) - r_input(2) ) * (r(2) - r_input(2))
   distance_j += (r(3) - r_input(3) ) * (r(3) - r_input(3))
@@ -141,6 +246,7 @@ double precision function cell_function_becke_general_adapt(r, atom_number, r_in
 
   cell_function_becke_general_adapt *= step_function_becke(nu_ij)
  
+  !write(*,'(100E13.4)'), distance_j, mu_ij, nu_ij, cell_function_becke_general_adapt
 
   return
 end
@@ -149,7 +255,7 @@ end
 double precision function cell_function_becke_extra_atom(r, r_input, slater_inter_per_input)
   BEGIN_DOC
   ! 
-  ! Weight of a given point "r" (in a Voronoi partition) with respect to a point characterized by "r_input" and slater_inter_per_input
+  ! Return the Becke-weight of a given point "r" with respect to a point characterized by "r_input" and slater_inter_per_input
   !
   ! 
   ! See Becke (1988, JCP,88(4))
@@ -158,16 +264,20 @@ double precision function cell_function_becke_extra_atom(r, r_input, slater_inte
 
   implicit none
   double precision, intent(in) :: r(3)
-  double precision, intent(in) :: r_input(3),slater_inter_per_input(nucl_num)
-  integer                      :: j
-  double precision             :: mu_ij, nu_ij
-  double precision             :: distance_i, distance_j, step_function_becke
-  double precision             :: inv_dist
+  double precision, intent(in) :: r_input(3)
+  double precision, intent(in) :: slater_inter_per_input(nucl_num)
+  !
+  integer           :: j
+  double precision  :: mu_ij, nu_ij
+  double precision  :: distance_i, distance_j, inv_dist
+  double precision :: step_function_becke
 
   distance_i  = (r(1) - r_input(1) ) * (r(1) - r_input(1))
   distance_i += (r(2) - r_input(2) ) * (r(2) - r_input(2))
   distance_i += (r(3) - r_input(3) ) * (r(3) - r_input(3))
   distance_i  = dsqrt(distance_i)
+
+  !write(*,'(100E13.5)') r, r_input, distance_i
 
   cell_function_becke_extra_atom = 1.d0
   do j = 1, nucl_num
@@ -182,32 +292,45 @@ double precision function cell_function_becke_extra_atom(r, r_input, slater_inte
     inv_dist += (r_input(3) - nucl_coord_transp(3,j) ) * (r_input(3) - nucl_coord_transp(3,j))
     inv_dist = 1.d0/dsqrt(inv_dist)
 
+    ! Elliptical coordinate (Becke Eq. 11)
     mu_ij = (distance_i - distance_j) * inv_dist
+    ! Heteronuclear correction (Becke Eq. A2)
     nu_ij = mu_ij + slater_inter_per_input(j) * (1.d0 - mu_ij*mu_ij)
 
     cell_function_becke_extra_atom *= step_function_becke(nu_ij)
+    !write(*,'(I4,100E13.4)'), j, distance_j, 1.d0/inv_dist, mu_ij, nu_ij, cell_function_becke_extra_atom
   enddo
 
   return
-end
+end function
 
 
 subroutine get_becke_functions_general(r,r_input,slater_inter_per_input,weights_per_atom)
  implicit none
  BEGIN_DOC
-! computes the Voronoi partition of a given point "r" with respect to a partition of 3D space 
-!
-! in terms of nucl_num atoms + 1 additional atom characterized by "r_input" and "slater_inter_per_input"
-!
-! returns the following partition :: weights_per_atom(i) == w(r,i) =  P(r,i) / \sum_{k in partition } P(r,k)
-!
-! WARNING the first entry corresponds to the fake atom "r_input"
+ !
+ ! Computes the Becke-weight associated to each atom, 'weights_per_atom',
+ ! at the point in real space 'r'.
+ ! The 3D space has been already Voronoi-partitioned in atom-centered Becke-cells
+ ! plus a new one associated to a ghost atom centered in 'r_input'.
+ ! The new Becke-cell is characterized by its center, r_input, and its
+ ! a_ij parameter defining offset Voronoi boundaries, 'slater_inter_per_input'
+ !
+ !
+ !
+ ! in terms of nucl_num atoms + 1 additional atom characterized by "r_input" and "slater_inter_per_input"
+ !
+ ! returns the following partition :: weights_per_atom(i) == w(r,i) =  P(r,i) / \sum_{k in partition } P(r,k)
+ !
+ ! WARNING the first entry corresponds to the fake atom "r_input"
  END_DOC
  double precision, intent(in) :: r(3), r_input(3), slater_inter_per_input(nucl_num)
  double precision, intent(out):: weights_per_atom(nucl_num+1)
  double precision :: norm,cell_function_becke_extra_atom,cell_function_becke_general_adapt
  integer :: i
+ !
  norm = 0.d0
+ !
  ! weights_per_atom(i_nucl) = P(r,i_nucl)/sum_k P(r,k) 
  ! BUT NOW sum_k P(r,k) = P(r,new_atom) + \sum_k = 1, nucl_num  P(r,k)
 
@@ -227,48 +350,58 @@ subroutine get_becke_functions_general(r,r_input,slater_inter_per_input,weights_
  enddo
 end
 
+
 subroutine get_voronoi_partition(r_input,grid_points,slater_inter_per_input,weight_tmp)
- implicit none
- BEGIN_DOC
- ! subroutine that computes the voronoi weights for a set of points "grid_points"  
- !
- ! where the voronoi partition is made of nucl_num atoms + 1 extra atom at r_input and characterized by slater_inter_per_input
- END_DOC
- double precision, intent(in) :: r_input(3),grid_points(3,n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
- double precision, intent(in) :: slater_inter_per_input(nucl_num)
- double precision, intent(out):: weight_tmp(n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
- integer :: i_nucl,k,l
- double precision :: r(3),weights_per_atom(nucl_num+1)
-  ! run over all points in space
-  ! that are referred to each atom
+  implicit none
+  BEGIN_DOC
+  ! Computes the Voronoi Becke-weights for a set of 'grid_points'.
+  ! The Voronoi partition is made of nucl_num atoms + 1 cells, where the +1 
+  ! stands for an additional spherical cell centered around 'r_input', treated
+  ! as an extra atom.
+  !
+  !extra atom at r_input and characterized by slater_inter_per_input
+  END_DOC
+  double precision, intent(in) :: r_input(3)
+  !double precision, intent(in) :: grid_points(3,n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
+  double precision, intent(in) :: grid_points(3,n_points_extra_integration_angular, &
+                                            & n_points_extra_radial_grid,           &
+                                            & nucl_num+1)
+  double precision, intent(in) :: slater_inter_per_input(nucl_num)
+  !double precision, intent(out):: weight_tmp(n_points_integration_angular_adapt,n_points_radial_grid_adapt,nucl_num+1)
+  double precision, intent(out):: weight_tmp(n_points_extra_integration_angular, &
+                                           & n_points_extra_radial_grid,         &
+                                           & nucl_num+1)
+  integer :: i_nucl,k,l
+  double precision :: r(3)
+  double precision :: weights_per_atom(nucl_num+1)
+  !
+  ! Loop over all grid points fixed in space (those points of the grid that do 
+  ! not change because they are referred to each real atom, not the ghost-one)
   do i_nucl = 1, nucl_num
-    !for each radial grid attached to the "jth" atom
-    do k = 1, n_points_radial_grid_adapt -1
-      ! for each angular point attached to the "jth" atom
-      do l = 1, n_points_integration_angular_adapt
-        r(1) = grid_points(1,l,k,i_nucl+1)
-        r(2) = grid_points(2,l,k,i_nucl+1)
-        r(3) = grid_points(3,l,k,i_nucl+1)
-        
+    !do k = 1, n_points_radial_grid_adapt -1
+    do k = 1, n_points_extra_radial_grid -1
+      !do l = 1, n_points_integration_angular_adapt
+      do l = 1, n_points_extra_integration_angular
+        r(1:3) = grid_points(1:3,l,k,i_nucl+1)
         call get_becke_functions_general(r,r_input,slater_inter_per_input,weights_per_atom)
         weight_tmp(l,k,i_nucl+1) = weights_per_atom(i_nucl+1)
+        !write(*,'(3I4,E13.6)') i_nucl, k, l, weight_tmp(l,k,i_nucl+1)
       enddo
     enddo
   enddo
 
-  !! loop on new points belonging to the r_input atom 
-  i_nucl = 1
-    !for each radial grid attached to the "jth" atom
-    do k = 1, n_points_radial_grid_adapt -1
-      ! for each angular point attached to the "jth" atom
-      do l = 1, n_points_integration_angular_adapt
-        r(1) = grid_points(1,l,k,i_nucl)
-        r(2) = grid_points(2,l,k,i_nucl)
-        r(3) = grid_points(3,l,k,i_nucl)
+ ! Loop over all new grid points that belong to the moving grid of the 
+ ! ghost-atom centered in 'r_input'
+ i_nucl = 1
+ !do k = 1, n_points_radial_grid_adapt -1
+ do k = 1, n_points_extra_radial_grid -1
+   !do l = 1, n_points_integration_angular_adapt
+   do l = 1, n_points_extra_integration_angular
+     r(1:3) = grid_points(1:3,l,k,i_nucl)
+     call get_becke_functions_general(r,r_input,slater_inter_per_input,weights_per_atom)
+     weight_tmp(l,k,i_nucl) = weights_per_atom(i_nucl)
+     !write(*,'(3I4,E13.6)') i_nucl, k, l, weight_tmp(l,k,i_nucl)
+   enddo
+ enddo
 
-        call get_becke_functions_general(r,r_input,slater_inter_per_input,weights_per_atom)
-        weight_tmp(l,k,i_nucl) = weights_per_atom(i_nucl)
-      enddo
-    enddo
-
-end
+end subroutine
