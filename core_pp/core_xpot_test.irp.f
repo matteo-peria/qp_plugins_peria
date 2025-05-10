@@ -29,11 +29,11 @@ end program
 ! ---
 
 subroutine main()
-  use io_array !io_module
+  !use io_array !io_module
+  use io_test_interface
   implicit none
 
   double precision :: difference
-  integer :: i,j,ii,jj
 
 
   !print*,'EXACT'
@@ -51,33 +51,33 @@ subroutine main()
                            & col_indx=list_valence_pseudo)
 
   write(*,'(A)') repeat('=', 70)
-
-  print*,'CORE_XPOT_NUMERIC_FULL_EXTRA_GRID'
-  call compute_dp_array_diff(core_xpot_numeric_full_extra_grid, &
-                           & core_xpot_exact, &
-                           & show = .False.,              &
-                           & row_indx=list_valence_pseudo,&
-                           & col_indx=list_valence_pseudo)
-
-  write(*,'(A)') repeat('=', 70)
-
-
-  print*,'CORE_XPOT_NUMERIC_ADAPT_OLD'
-  call compute_dp_array_diff(core_xpot_numeric_adapt_old, &
-                           & core_xpot_exact, &
-                           & show = .False.,              &
-                           & row_indx=list_valence_pseudo,       &
-                           & col_indx=list_valence_pseudo)
-
-  write(*,'(A)') repeat('=', 70)
-
-  print*,'CORE_XPOT_NUMERIC_FULL_ADAPT_GRID'
-  call compute_dp_array_diff(core_xpot_numeric_full_adapt_grid, &
-                           & core_xpot_exact, &
-                           & show = .False.,              &
-                           & row_indx=list_valence_pseudo,       &
-                           & col_indx=list_valence_pseudo)
-
-  write(*,'(A)') repeat('=', 70)
+!
+!  print*,'CORE_XPOT_NUMERIC_FULL_EXTRA_GRID'
+!  call compute_dp_array_diff(core_xpot_numeric_full_extra_grid, &
+!                           & core_xpot_exact, &
+!                           & show = .False.,              &
+!                           & row_indx=list_valence_pseudo,&
+!                           & col_indx=list_valence_pseudo)
+!
+!  write(*,'(A)') repeat('=', 70)
+!
+!
+!  print*,'CORE_XPOT_NUMERIC_ADAPT_OLD'
+!  call compute_dp_array_diff(core_xpot_numeric_adapt_old, &
+!                           & core_xpot_exact, &
+!                           & show = .False.,              &
+!                           & row_indx=list_valence_pseudo,       &
+!                           & col_indx=list_valence_pseudo)
+!
+!  write(*,'(A)') repeat('=', 70)
+!
+!  print*,'CORE_XPOT_NUMERIC_FULL_ADAPT_GRID'
+!  call compute_dp_array_diff(core_xpot_numeric_full_adapt_grid, &
+!                           & core_xpot_exact, &
+!                           & show = .False.,              &
+!                           & row_indx=list_valence_pseudo,       &
+!                           & col_indx=list_valence_pseudo)
+!
+!  write(*,'(A)') repeat('=', 70)
 
 end subroutine

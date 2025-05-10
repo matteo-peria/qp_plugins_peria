@@ -1,6 +1,8 @@
-module io_array
+!module io_array
+module io_z
 
   use io_color
+  use io_const
 
   implicit none
 
@@ -156,4 +158,4 @@ subroutine print_db_array(array,indx_row,indx_col)
 end subroutine print_db_array
 
 
-end module io_array
+end module io_z
