@@ -76,7 +76,8 @@ END_PROVIDER
 
   dr_adapt_radial_integral = 1.d0 / dble(n_points_rad_adapt_grid-1)
 
-  do i = 1, n_points_rad_extra_grid
+  !do i = 1, n_points_rad_extra_grid
+  do i = 1, n_points_rad_adapt_grid
     grid_adapt_points_radial(i) = dble(i-1) * dr_adapt_radial_integral
   enddo
 

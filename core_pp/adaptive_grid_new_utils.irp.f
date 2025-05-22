@@ -34,6 +34,9 @@
   enddo
   alpha_knowles_new = alpha_knowles_new/norm
   slater_bragg_radius_new = slater_bragg_radius_new/norm
+
+ !write(*,*) 'alpha_knowles_new = ', alpha_knowles_new 
+ !write(*,*) 'slater_bragg_radius_new = ', slater_bragg_radius_new
  
   ! Compute the Becke a_ij parameters necessary for heteronuclear integrals.
   ! The fuzzy Becke-cell boundaries are shifted off center according to atoms'
@@ -51,6 +54,8 @@
       a_ij_new(j) = -0.5d0
     endif
   enddo
+  !write(*,*) 'a_ij_new'
+  !write(*,*) a_ij_new
  end subroutine
 
 
@@ -146,6 +151,14 @@
      call get_becke_functions_general2(r,rp,float_grid_becke_boundary_shift,weights_per_atom)
      becke_weights_at_float_grid(l,k,i_nucl) = weights_per_atom(i_nucl)
      !write(*,'(3I4,E13.6)') i_nucl, k, l, becke_weights_at_float_grid(l,k,i_nucl)
+     
+     if(isnan(becke_weights_at_float_grid(l,k,i_nucl))) then
+       print*,'isnan(becke_weights_at_float_grid(l,k,i_nucl))'
+       print*,l,k,i_nucl
+       print*, becke_weights_at_float_grid(l,k,i_nucl)
+       stop                                                                                        
+     endif                                                                   
+
    enddo
  enddo
 
@@ -195,8 +208,19 @@ subroutine get_becke_functions_general2(r, r_input, slater_inter_per_input, weig
    weights_per_atom(i+1) = cell_function_becke_general_adapt2(r, i, r_input, slater_inter_per_input) 
  enddo
 
+ if (any(isnan(weights_per_atom))) then
+   print*, 'AAAAAAAH THERE IS SOME NAN IN WEIGHTS PER ATOM'
+   print*, 'weights_per_atom: '
+   print*, weights_per_atom
+   print*, 'sum(weights_per_atom): ', sum(weights_per_atom)
+   stop
+ endif
+
  ! Normalisation computed as w_i(r) = P_i(r) / \sum_n P_n(r) (Eq. 22 Becke paper)
+ !print*, 'im in get_becke_function_general2'
+ !print*, 'sum(weights_per_atom) = ', sum(weights_per_atom)
  weights_per_atom = weights_per_atom/sum(weights_per_atom)
+
 end subroutine
 
 
@@ -273,10 +297,10 @@ double precision function cell_function_becke_general_adapt2(r, atom_number, rp,
   !
   !OUTPUT
   !
-  integer                      :: j
-  double precision             :: r_i, r_j
-  double precision             :: mu_ij, nu_ij
-  double precision             :: step_function_becke
+  integer          :: j
+  double precision :: r_i, r_j
+  double precision :: mu_ij, nu_ij
+  double precision :: step_function_becke
   double precision :: r_ij
   
   cell_function_becke_general_adapt2 = 1.d0
@@ -297,7 +321,7 @@ double precision function cell_function_becke_general_adapt2(r, atom_number, rp,
     nu_ij = mu_ij + slater_bragg_type_inter_distance_ua(atom_number,j) * (1.d0 - mu_ij*mu_ij)
     ! Update Becke-weight with j-th atom contribution
     cell_function_becke_general_adapt2 *= step_function_becke(nu_ij)
-    write(*,'(I4,100E13.4)'), j, r_j, mu_ij, nu_ij, cell_function_becke_general_adapt2
+    !write(*,'(I4,100E13.4)'), j, r_j, mu_ij, nu_ij, cell_function_becke_general_adapt2
   enddo
 
   ! Contribute coming from the extra atom positioned at 'rp'

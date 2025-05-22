@@ -89,6 +89,13 @@ subroutine get_adaptive_grid(r, fixed_grid, float_grid, &
       float_grid_weights(k,i,i_nucl) = becke_weights_at_float_grid(k,i,i_nucl) &
                                     & *weights_angular_adapt_points(k)  &
                                     & *weight_knowles*dr_adapt_radial_integral
+      if (isnan(float_grid_weights(k,i,i_nucl))) then
+        print*, 'errore nella float_grid_weights'
+        print*, 'cycle: ', i_nucl, i, k
+        print*, becke_weights_at_float_grid(k,i,i_nucl), weights_angular_points_extra(k), weight_knowles, dr_radial_extra_integral
+        stop
+      end if
+
       ! Pruning on the moving grid
       if (dabs(float_grid_weights(k,i,i_nucl)) < thresh_grid) then                    
         cycle                                                                 
@@ -110,6 +117,12 @@ subroutine get_adaptive_grid(r, fixed_grid, float_grid, &
         fixed_grid_weights(k,i,i_nucl) = becke_weights_at_fixed_grid(k,i,i_nucl)   &
                                       & *weights_angular_points_extra(k)           &
                                       & *weight_knowles * dr_radial_extra_integral
+        if (isnan(fixed_grid_weights(k,i,i_nucl))) then
+          print*, 'errore nella fixed_grid_weights'
+          print*, 'cycle: ', i_nucl, i, k
+          print*, becke_weights_at_fixed_grid(k,i,i_nucl), weights_angular_points_extra(k), weight_knowles, dr_radial_extra_integral
+          stop
+        end if
         ! Pruning on the fixed grid
         if (dabs(fixed_grid_weights(k,i,i_nucl)) < thresh_grid) then                    
           cycle                                                                 

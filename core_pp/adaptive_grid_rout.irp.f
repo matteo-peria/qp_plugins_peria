@@ -102,6 +102,10 @@ end subroutine
  enddo
  alpha_av = alpha_av/norm
  radii_ua_av = radii_ua_av/norm
+
+ !write(*,*) 'alpha_av    = ', alpha_av
+ !write(*,*) 'radii_ua_av = ', radii_ua_av
+
  
  double precision :: xhi_tmp,u_ij
  !! determines the slater_inter distance radii for each atoms with respect to r_input
@@ -115,6 +119,9 @@ end subroutine
    slater_inter_per_atom(j) = -0.5d0
   endif
  enddo
+
+  !write(*,*) 'slater_inter_per_atom'
+  !write(*,*)  slater_inter_per_atom
 
  end
 
@@ -226,7 +233,7 @@ double precision function cell_function_becke_general_adapt(r, atom_number, r_in
 
     cell_function_becke_general_adapt *= step_function_becke(nu_ij)
 
-    write(*,'(I4,100E13.4)'), j, distance_j, mu_ij, nu_ij, cell_function_becke_general_adapt
+    !write(*,'(I4,100E13.4)'), j, distance_j, mu_ij, nu_ij, cell_function_becke_general_adapt
   enddo
 
   ! Contribute coming from the extra atom

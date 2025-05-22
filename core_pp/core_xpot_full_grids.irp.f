@@ -156,7 +156,7 @@ BEGIN_PROVIDER [ double precision, core_xpot_numeric_full_adapt_grid, (mo_num, m
   double precision :: grid_fixed_weights(n_points_ang_extra_grid,n_points_rad_extra_grid,nucl_num)
 
   ! To be used for pruning
-  integer :: n_fixed_pts_effective
+  integer :: n_fixed_pts_effective(nucl_num)
   integer :: n_float_pts_effective
   integer :: n_pts_effective_max
 
@@ -177,8 +177,17 @@ BEGIN_PROVIDER [ double precision, core_xpot_numeric_full_adapt_grid, (mo_num, m
                          & grid_fixed_weights, grid_float_weights,           &         
                          & n_fixed_pts_effective, n_float_pts_effective,     &
                          & n_pts_effective_max)
+
+    !do k=1, nucl_num
+    !  do j_rad = 1, n_points_rad_extra_grid
+    !    do j_ang = 1, n_points_ang_extra_grid
+    !      print*, k, j_rad, j_ang, grid_fixed_weights(j_ang,j_rad,k)
+    !    end do
+    !  end do
+    !end do
+
     ! Compute first contributions coming from the floating grid
-    do j_rad = 1, n_points_rad_float_grid
+    do j_rad = 1, n_points_rad_float_grid - 1
       do j_ang = 1, n_points_ang_float_grid
         rp(1:3) = grid_float_points(1:3,j_ang,j_rad,1)
         weight_rp = grid_float_weights(j_ang,j_rad,1)
@@ -198,6 +207,15 @@ BEGIN_PROVIDER [ double precision, core_xpot_numeric_full_adapt_grid, (mo_num, m
           mo_j_rp = mos_array_rp(j_mo)
           do i_mo = 1, mo_num
             mo_i_r = mos_in_r_array(i_mo,ir)
+
+              if (isnan(v_x_core * mo_j_rp * mo_i_r * weight_rp * weight_r)) then
+                print*, 'floating grid problem'
+                print*, 'j_nucl, j_rad, j_ang, k, j_mo, i_mo'
+                print*, j_nucl, j_rad, j_ang, k, j_mo, i_mo
+                print*, v_x_core, mo_j_rp, mo_i_r, weight_rp, weight_r
+                stop
+              end if
+
             core_xpot_numeric_full_adapt_grid(i_mo,j_mo) += &
                          & v_x_core * mo_j_rp * mo_i_r * weight_rp * weight_r
           enddo
@@ -207,7 +225,7 @@ BEGIN_PROVIDER [ double precision, core_xpot_numeric_full_adapt_grid, (mo_num, m
 
     ! Compute contributions coming from the (fixed) extra grid
     do j_nucl = 1, nucl_num
-      do j_rad = 1, n_points_rad_extra_grid
+      do j_rad = 1, n_points_rad_extra_grid-1
         do j_ang = 1, n_points_ang_extra_grid
           rp(1:3) = grid_points_extra_per_atom(1:3,j_ang,j_rad,j_nucl)
           weight_rp = grid_fixed_weights(j_ang,j_rad,j_nucl)
@@ -228,6 +246,13 @@ BEGIN_PROVIDER [ double precision, core_xpot_numeric_full_adapt_grid, (mo_num, m
             mo_j_rp = mos_in_r_full_extra_grid(j_mo,j_ang,j_rad,j_nucl)              
             do i_mo = 1, mo_num
               mo_i_r = mos_in_r_array(i_mo,ir)
+              if (isnan(v_x_core * mo_j_rp * mo_i_r * weight_rp * weight_r)) then
+                print*, 'fixed grid problem'
+                print*, j_nucl, j_rad, j_ang, k, j_mo, i_mo
+                print*, v_x_core, mo_j_rp, mo_i_r, weight_rp, weight_r
+                stop
+              end if
+
               core_xpot_numeric_full_adapt_grid(i_mo,j_mo) += &
                      & v_x_core * mo_j_rp * mo_i_r * weight_rp * weight_r
             enddo
