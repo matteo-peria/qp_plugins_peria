@@ -6,4 +6,4 @@ program io_test
 ! TODO : Put the documentation of the program here
   END_DOC
   print *, 'Hello world'
-end
+end program

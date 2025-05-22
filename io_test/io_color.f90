@@ -181,5 +181,44 @@ end function anycolor
     end if
   end function new_color_output
 
+subroutine print_array_color(arr, mask)
+  implicit none
+
+  double precision, intent(in) :: arr(:,:)
+  logical, intent(in) :: mask(:,:)
+
+  integer :: row, col
+  character(len=:), allocatable :: esc_green, esc_red, esc_reset
+
+  esc_green = escape_color(color%green)
+  esc_red   = escape_color(color%red)
+  esc_reset = escape_color(color%reset)
+
+!  if (any(shape(arr(r_indx,c_indx)) /= shape(mask))) then
+  if (any(shape(arr) /= shape(mask))) then
+    print *, "❌ Array and coloring mask have different shapes."
+    !print*, 'Array to be printed shape: ', shape(arr(r_indx,c_indx))
+    print*, 'Array to be printed shape: ', shape(arr)
+    print*, 'Array color mask shape:    ', shape(mask)
+    return
+  end if
+
+!  do row = 1, size(arr(r_indx,c_indx), 1)
+!    do col = 1, size(arr(r_indx,c_indx), 2)
+  do row = 1, size(arr, 1)
+    do col = 1, size(arr, 2)
+      if (mask(row,col)) then
+        write(*,'(A,F12.7,A)', advance="no") esc_green, arr(row,col), esc_reset
+      else
+        write(*,'(A,F12.7,A)', advance="no") esc_red, arr(row,col), esc_reset
+      end if
+    end do
+    print*  ! newline
+  end do
+
+  print*  ! extra space after matrix 
+end subroutine print_array_color
+
+
 
 end module io_color
