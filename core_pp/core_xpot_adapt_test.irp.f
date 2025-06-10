@@ -9,7 +9,6 @@ program core_xpot_adapt_test
   character(len=100) :: filename
   logical :: has_arg
 
-  write(*,*) 'filename', filename
 
   has_arg = command_argument_count() >= 1
 
@@ -40,9 +39,6 @@ subroutine test_grids_core_xpot_adapt(filename)
   !call print_db_array(core_xpot_exact, list_valence_pseudo, list_valence_pseudo)
   
   write(*,'(A)') repeat('=', 70)
-
-  !touch n_points_final_grid    ! DELETE, NOT NECESSARY
-
 
   print*,'CORE_XPOT_NUMERIC_FULL_ADAPT_GRID'
   call compute_dp_array_diff(core_xpot_numeric_full_adapt_grid, &

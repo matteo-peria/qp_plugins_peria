@@ -1,6 +1,30 @@
 ! grid_adapt_points_radial dr_adapt_radial_integral
 
 
+ BEGIN_PROVIDER [double precision, alph_knowles]
+  alph_knowles = my_alpha_knowles
+END_PROVIDER
+
+ BEGIN_PROVIDER [double precision, radius_ua_av]
+&BEGIN_PROVIDER [double precision, slater_rad_ratio_new, (nucl_num)]
+
+  radius_ua_av = my_radii_ua_av 
+
+  double precision :: chi, u_ij
+  integer :: j
+  do j = 1, nucl_num
+    chi = radius_ua_av / slater_bragg_radii_per_atom_ua(j)
+    u_ij = (chi - 1.d0 ) / (chi + 1.d0)
+    slater_rad_ratio_new(j) = u_ij  / (u_ij * u_ij - 1.d0)
+    if(slater_rad_ratio_new(j).gt.0.5d0)then
+      slater_rad_ratio_new(j) = 0.5d0
+    else if( slater_rad_ratio_new(j) .le.-0.5d0)then
+      slater_rad_ratio_new(j) = -0.5d0
+    endif
+  enddo
+END_PROVIDER
+
+
  BEGIN_PROVIDER [integer, n_points_radial_grid_adapt]
 &BEGIN_PROVIDER [integer, n_points_integration_angular_adapt]
   BEGIN_DOC
@@ -66,19 +90,14 @@ END_PROVIDER
 
  BEGIN_PROVIDER [double precision, grid_adapt_points_radial, (n_points_rad_adapt_grid)]
 &BEGIN_PROVIDER [double precision, dr_adapt_radial_integral]
-
   BEGIN_DOC
   ! points in [0,1] to map the radial integral [0,\infty]
   END_DOC
-
   implicit none
   integer :: i
-
   dr_adapt_radial_integral = 1.d0 / dble(n_points_rad_adapt_grid-1)
-
   !do i = 1, n_points_rad_extra_grid
   do i = 1, n_points_rad_adapt_grid
     grid_adapt_points_radial(i) = dble(i-1) * dr_adapt_radial_integral
   enddo
-
 END_PROVIDER

@@ -56,7 +56,10 @@ subroutine get_adaptive_grid(r, fixed_grid, float_grid, &
   integer,          intent(out) :: n_float_pts_effective
   integer,          intent(out) :: n_pts_effective_max
   !
-  double precision :: a_knowles,radii_ua_av,slater_inter_per_atom(nucl_num)
+  double precision :: a_knowles
+  double precision :: radii_ua_av
+  double precision :: slater_inter_per_atom(nucl_num)
+
   double precision :: becke_weights_at_fixed_grid(n_points_ang_extra_grid,n_points_rad_extra_grid,nucl_num)
   double precision :: becke_weights_at_float_grid(n_points_ang_float_grid,n_points_rad_float_grid,1)
   double precision :: weights_per_atom(nucl_num+1)
@@ -64,8 +67,17 @@ subroutine get_adaptive_grid(r, fixed_grid, float_grid, &
   double precision :: weight_knowles, weight_total
   integer :: i,k,i_nucl
 
-  ! Compute parameters from the new floating grid
-  call get_floating_grid_param(r, a_knowles, radii_ua_av, slater_inter_per_atom)
+
+
+  if (my_grid_adapt_param) then 
+    ! Compute parameters of the new floating grid starting from the one of extra
+    call get_floating_grid_param(r, a_knowles, radii_ua_av, slater_inter_per_atom)
+  else 
+    ! Adaptive parameters are hard coded into the EZFIO file
+    a_knowles = alph_knowles !my_alpha_knowles
+    radii_ua_av = radius_ua_av !my_radii_ua_av
+    slater_inter_per_atom = slater_rad_ratio_new
+  end if
 
   ! Compute cartesian coordinates of floating grid only 
   call get_floating_grid_at_r(r, a_knowles, angular_adapt_quadrature_points, float_grid)

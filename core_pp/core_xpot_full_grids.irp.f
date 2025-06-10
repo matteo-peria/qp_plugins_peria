@@ -178,14 +178,6 @@ BEGIN_PROVIDER [ double precision, core_xpot_numeric_full_adapt_grid, (mo_num, m
                          & n_fixed_pts_effective, n_float_pts_effective,     &
                          & n_pts_effective_max)
 
-    !do k=1, nucl_num
-    !  do j_rad = 1, n_points_rad_extra_grid
-    !    do j_ang = 1, n_points_ang_extra_grid
-    !      print*, k, j_rad, j_ang, grid_fixed_weights(j_ang,j_rad,k)
-    !    end do
-    !  end do
-    !end do
-
     ! Compute first contributions coming from the floating grid
     do j_rad = 1, n_points_rad_float_grid - 1
       do j_ang = 1, n_points_ang_float_grid
