@@ -70,13 +70,13 @@ subroutine get_adaptive_grid(r, fixed_grid, float_grid, &
 
 
   if (my_grid_adapt_param) then 
-    ! Compute parameters of the new floating grid starting from the one of extra
-    call get_floating_grid_param(r, a_knowles, radii_ua_av, slater_inter_per_atom)
-  else 
     ! Adaptive parameters are hard coded into the EZFIO file
     a_knowles = alph_knowles !my_alpha_knowles
     radii_ua_av = radius_ua_av !my_radii_ua_av
     slater_inter_per_atom = slater_rad_ratio_new
+  else 
+    ! Compute parameters of the new floating grid starting from the one of extra
+    call get_floating_grid_param(r, a_knowles, radii_ua_av, slater_inter_per_atom)
   end if
 
   ! Compute cartesian coordinates of floating grid only 

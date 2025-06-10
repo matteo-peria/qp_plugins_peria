@@ -89,12 +89,12 @@ subroutine test_grids_core_xpot_adapt(filename)
                        & 'N_rad2', 'N_ang2', 'N_sph2', 'N_ful2',           &
                        & 'N_rad3', 'N_ang3', 'N_sph3', 'N_ful3',           &
                        & 'TOT(p1+f3)', &
-                       & 'radius', 'alpha', &
+                       & 'alpha', 'radius', &
                        & 'RES(p1+f3)'
   end if
 
   character(len=100) :: fmt_num
-  fmt_num = '(13I8, I12, 2F6.3, E12.3)'
+  fmt_num = '(13I8, I12, 2F8.2, E12.3)'
 
   write(unit_out, fmt_num)                            &
       & n_points_rad_grid,                            &
