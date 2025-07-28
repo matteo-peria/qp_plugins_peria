@@ -1,4 +1,4 @@
-subroutine compute_dp_array_diff(arr1, arr2, threshold, show, row_indx, col_indx, diff)
+subroutine compute_dp_array_diff(arr1, arr2, threshold, show, row_indx, col_indx, message, diff)
   use io_color
   use io_const
 
@@ -6,24 +6,28 @@ subroutine compute_dp_array_diff(arr1, arr2, threshold, show, row_indx, col_indx
   double precision, intent(in) :: arr1(:,:)
   double precision, intent(in) :: arr2(:,:)
   double precision, intent(in), optional :: threshold
-  logical,  intent(in), optional :: show
-  integer,  intent(in), optional :: row_indx(:)
-  integer,  intent(in), optional :: col_indx(:)
+  logical, intent(in), optional :: show
+  integer, intent(in), optional :: row_indx(:)
+  integer, intent(in), optional :: col_indx(:)
+  character(len=*), intent(in), optional :: message
   ! OUTPUT
   double precision, intent(out) :: diff
+
   ! Manage optional arguments
-  double precision             :: thr
+  double precision     :: thr
   logical              :: show_array
   integer, allocatable :: r_indx(:)
   integer, allocatable :: c_indx(:)
- 
+  character(len=:), allocatable :: msg
+
+  ! Other 
   double precision, allocatable :: arr(:,:)
   logical, allocatable :: mask(:,:)
   integer :: row, col
 
   ! Check arguments
   if (any(shape(arr1) /= shape(arr2))) then
-    print *, "❌ Arrays have different shapes."
+    print *, "X Arrays have different shapes."
     return
   end if
 
@@ -54,8 +58,15 @@ subroutine compute_dp_array_diff(arr1, arr2, threshold, show, row_indx, col_indx
     c_indx = [(col, col=1,size(arr1,2))]
   end if
 
+  if (present(message)) then
+    allocate(character(len=len_trim(message)) :: msg)
+    msg = trim(message)
+  else
+    msg = "Difference is: "
+  end if
+
   diff = sum(abs(arr1(r_indx,c_indx) - arr2(r_indx,c_indx)))
-  print*,'Difference = ', diff
+  print*, msg, diff
 
   if (show_array) then
     mask = (abs(arr1(r_indx,c_indx) - arr2(r_indx,c_indx)) <= thr)
