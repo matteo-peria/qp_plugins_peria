@@ -38,10 +38,11 @@ END_PROVIDER
   implicit none
 
   if(.not. my_grid_adapt) then
+    print*, "MY_GRID_ADAPT be careful in modifying these values"
     select case (adapt_grid_type_sgn)
       case(0)
-        n_points_extra_radial_grid = 23
-        n_points_extra_integration_angular = 170  
+        n_points_radial_grid_adapt = 23
+        n_points_integration_angular_adapt = 170  
       case(1)
         n_points_radial_grid_adapt = 50
         n_points_integration_angular_adapt = 194
