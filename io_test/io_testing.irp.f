@@ -97,7 +97,7 @@ subroutine print_array_diff(arr1, arr2, threshold)
   esc_reset = escape_color(color%reset)
 
   if (any(shape(arr1) /= shape(arr2))) then
-    print *, "❌ Arrays have different shapes."
+    print *, "Error: arrays have different shapes."
     return
   end if
 
