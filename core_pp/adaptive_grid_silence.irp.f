@@ -64,7 +64,6 @@ subroutine get_adaptive_grid( r                                            &
 
   double precision :: becke_weights_at_fixed_grid(n_points_ang_extra_grid,n_points_rad_extra_grid,nucl_num)
   double precision :: becke_weights_at_float_grid(n_points_ang_float_grid,n_points_rad_float_grid,1)
-  double precision :: weights_per_atom(nucl_num+1)
   double precision :: norm,x,derivative_knowles_function,knowles_function
   double precision :: weight_knowles, weight_total
   integer :: i,k,i_nucl
@@ -110,6 +109,7 @@ subroutine get_adaptive_grid( r                                            &
         weight_knowles = derivative_knowles_function(a_knowles, m_knowles, x) &
                       & *knowles_function(a_knowles, m_knowles, x)**2
         ! Quadrature weight * Becke partitioning weight
+        print*,'becke_weights',becke_weights_at_float_grid(k,i,i_nucl),x
         float_grid_weights(k,i,i_nucl) = becke_weights_at_float_grid(k,i,i_nucl) &
                                       & *weights_angular_adapt_points(k)  &
                                       & *weight_knowles*dr_adapt_radial_integral

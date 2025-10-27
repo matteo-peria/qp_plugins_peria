@@ -14,6 +14,7 @@ END_PROVIDER
   integer :: j
   do j = 1, nucl_num
     chi = radius_ua_av / slater_bragg_radii_per_atom_ua(j)
+    !chi =  slater_bragg_radii_per_atom_ua(j) /radius_ua_av 
     u_ij = (chi - 1.d0 ) / (chi + 1.d0)
     slater_rad_ratio_new(j) = u_ij  / (u_ij * u_ij - 1.d0)
     if(slater_rad_ratio_new(j).gt.0.5d0)then
@@ -22,6 +23,8 @@ END_PROVIDER
       slater_rad_ratio_new(j) = -0.5d0
     endif
   enddo
+
+  print*, "SLATER_RAD_RATIO_NEW, ", SLATER_RAD_RATIO_NEW
 END_PROVIDER
 
 
