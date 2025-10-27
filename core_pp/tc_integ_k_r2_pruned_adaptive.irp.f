@@ -214,7 +214,7 @@ subroutine get_int2_grad1_u12_ao_pruned_adaptive( i1, n_aos         &
   do m = 1, 3
     call dgemm( "T", "N", ao_num*ao_num, 1, n_fixed                &
               , 1.d0, aos_lj_prod_in_r2(1,1,1), n_fixed            & 
-              , grad1_u12_vect_on_full_extra(:,i1,m), n_fixed        &
+              , grad1_u12_vect_on_full_extra_grid(:,i1,m), n_fixed        &
               , 0.d0, int2_grad1_u12_ao_vect(1,1,m), ao_num*ao_num &
               ) 
   enddo
@@ -240,4 +240,4 @@ subroutine get_int2_grad1_u12_ao_pruned_adaptive( i1, n_aos         &
 !  call print_memory_usage()
 
 
-end subroutine get_int2_grad1_u12_ao
+end subroutine get_int2_grad1_u12_ao_pruned_adaptive
