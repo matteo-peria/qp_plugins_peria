@@ -1,12 +1,32 @@
+! This is just a testing program to check 
+! - if gradients computed with new subroutines are the same as those computed
+!   with old subroutines
+! - if gradient wrt to r1 on the whole grid2 can be stored (small atoms)
+! - if more general providers contained in tc_jast_deriv_on_full_extra.irp.f,
+!
+!     grad1_u12_vect_on_full_extra_grid
+!     grad1_u12_sqrd_on_full_extra
+!
+!   which store gradients on the whole grid2 for different of Jastrow functions, 
+!   give the same result as other old providers. 
+!   Old providers give the gradients on the pruned extra grid only,
+!   so we had to adapt the old ones to have the gradients on the
+!   full extra grid. These are contained in *.irp.f and are:
+!
+!
+!   which do the same, but for numerical Jastrows only
+
+
 program tc_compare_grad1_u12_on_full_extra_grid
   BEGIN_DOC
   END_DOC
   implicit none
-  call compare
+  call compare_subroutines
+  !call compare_providers
 end program tc_compare_grad1_u12_on_full_extra_grid
 
 
-subroutine compare
+subroutine compare_subroutines
   use io_test_interface
   implicit none
   integer :: i1
@@ -120,7 +140,7 @@ subroutine compare
                               , diff=diff_sqrd_provider        )
     ! Comparison OLD gradients and the NEW PROVIDER computed with the new subroutine (VECTORIAL)
     call compute_dp_array_diff( grad1_u12_vect_old(:,1:3)              &
-                              , grad1_u12_vect_on_full_extra(:,i1,1:3) &
+                              , grad1_u12_vect_on_full_extra_grid(:,i1,1:3) &
                               , show = .False.                         &
                               , message = "Diff vect (NEW PROVIDER): " &
                               , diff=diff_vect_provider        )
@@ -144,4 +164,4 @@ subroutine compare
   write(*,*) "OVERALL Difference in the SQUARED gradients:   ", diff_sqrd_overall_provider
 
 
-end subroutine
+end subroutine compare_subroutines

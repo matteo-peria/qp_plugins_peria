@@ -1,12 +1,31 @@
+! This is just a testing program to check 
+! - if gradients computed with new subroutines are the same as those computed
+!   with old subroutines
+! - if gradient wrt to r1 on the whole grid2 can be stored (small atoms)
+! - if more general providers contained in *.irp.f,
+!
+!     grad1_u12_vect_on_pruned_extra_grid
+!     grad1_u12_sqrd_on_prune_grid2,
+!
+!   which store gradients on the pruned extra grid for different of Jastrow functions, 
+!   give the same result as other old providers, such as those contained in non_h_ints_mu/jast_deriv.irp.f, 
+!
+!     grad1_u12_num
+!     grad1_u12_squared_num,
+!
+!   which do the same, but for numerical Jastrows only
+
+
 program tc_compare_grad1_u12_on_pruned_extra_grid
   BEGIN_DOC
   END_DOC
   implicit none
-  call compare
+  call compare_subroutines
+  !call compare_providers
 end program tc_compare_grad1_u12_on_pruned_extra_grid
 
 
-subroutine compare
+subroutine compare_subroutines
   use io_test_interface
   implicit none
   integer :: i1
@@ -101,6 +120,37 @@ subroutine compare
   write(*,*) "OVERALL Difference in the VECTORIAL gradients: ", diff_vect_overall
   write(*,*) "OVERALL Difference in the SQUARED gradients:   ", diff_sqrd_overall
 
+end subroutine compare_subroutines
 
 
-end subroutine
+!subroutine compare_providers
+!  use io_test_interface
+!  implicit none
+!
+!  double precision :: difference
+!
+!  !provide grad1_u12_vect_on_full_extra_grid
+!  !provide grad1_u12_sqrd_on_full_extra
+!
+!  print*, "PROVIDING grad1_u12_vect_on_pruned_extra_grid"
+!  print*, "PROVIDING grad1_u12_sqrd_on_prune_grid2"
+!
+!
+!  provide grad1_u12_vect_on_pruned_extra_grid
+!  provide grad1_u12_sqrd_on_prune_grid2
+!
+!  print*, "grad1_u12_vect_on_pruned_extra_grid PROVIDED"
+!  print*, "grad1_u12_sqrd_on_prune_grid2 PROVIDED" 
+!
+!
+!  provide grad1_u12_num
+!  provide grad1_u12_squared_num
+!
+!  !call compute_dp_array_diff( grad1_u12_sqrd_on_full_extra &
+!  call compute_dp_array_diff( grad1_u12_sqrd_on_prune_grid2 &
+!                            , grad1_u12_squared_num        &
+!                            , show = .False.            &
+!                            , message = "Difference : ", &
+!                            , diff = difference            )
+!
+!end subroutine compare_providers
