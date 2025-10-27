@@ -1,12 +1,19 @@
 subroutine get_int2_grad1_u12_ao_adapt(i1, int2_grad1_u12_ao_vect, int2_grad1_u12_ao_sqrd)
   BEGIN_DOC
-  !
   ! Compute the integrals in r2 involving the gradients of the Jastrow at 
-  ! a given r1, specified with the index i1 running on the grid1
+  ! a given r1 (indexed by i1 in grid1)
   !
   ! int2_grad1_u12_ao_vect_at_r1(j,l,:) = \int dr2 [\grad_r1 J(r1,r2)] \phi_i(r2) \phi_j(r2) 
   ! int2_grad1_u12_ao_sqrd_at_r1(j,l)   = -0.5 \int dr2 chi_l(r2) chi_j(r2) [grad_1 u(r1,r2)]^2
+  ! 
+  ! This is an OLD version of the subroutine, where the floating grid is 
+  ! computed internally. 
+  ! The NEW versions of this subroutine are
   !
+  !   get_int2_grad1_u12_ao_full_adaptive    in tc_integ_k_r2_full_adaptive.irp.f
+  !   get_int2_grad1_u12_ao_pruned_adaptive  in tc_integ_k_r2_pruned_adaptive.irp.f 
+  !
+  ! where the full and pruned actually refers to the fixed part of grid2
   END_DOC
 
   implicit none
@@ -194,4 +201,4 @@ subroutine get_int2_grad1_u12_ao_adapt(i1, int2_grad1_u12_ao_vect, int2_grad1_u1
   call print_memory_usage()
 
 
-end subroutine get_int2_grad1_u12_ao
+end subroutine get_int2_grad1_u12_ao_adapt
