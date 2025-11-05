@@ -1,25 +1,47 @@
 module jastrow_module
   implicit none
+
+  include 'constants.include.F'
+
   contains
 
-pure function j12(r1, r2, mu)
+
+pure function j12_mu(r1, r2, mu)
   !BEGIN_DOC
-  ! j(mu,r12) = 1/2 r12 (1 - erf(mu r12)) - 1/2 (sqrt(pi) * mu) e^{-(mu*r12)^2}
+  ! $$  j(r1,r2;mu) 
+  !   = u(r12;mu)
+  !   = 1/2 r12 (1 - erf(mu r12)) - 1/2 (sqrt(pi) * mu) e^{-(mu*r12)^2}$$
   !END_DOC
   implicit none
-  include 'constants.include.F'
-  double precision, intent(in) :: r1(3), r2(3), mu
+  double precision, intent(in) :: r1(3)
+  double precision, intent(in) :: r2(3)
+  double precision, intent(in) :: mu
   !
-  double precision :: j12
+  double precision :: j12_mu
   !
   double precision :: r12
 
   r12 = norm2(r1(1:3) - r2(1:3))
-  j12 = 0.5d0 * r12 * (1.d0 - derf(mu*r12)) - inv_sq_pi_2 * dexp(-mu*r12*mu*r12) / mu
-end function j12
+  j12_mu = u12_mu(r12,mu)
+  !j12_mu = 0.5d0 * r12 * (1.d0 - derf(mu*r12)) - inv_sq_pi_2 * dexp(-mu*r12*mu*r12) / mu
+end function j12_mu
 
 
-!double precision function deriv_j12_r12(r12,mu) result(deriv)
+pure function u12_mu(x, mu)
+  !BEGIN_DOC
+  ! Originally from: pot_j_gauss.irp.f:13:
+  ! double precision function j_mu_simple(x,mu)
+  ! $$ u_{\mu}(x) = 0.5  (1 - \erf(mu x)) - 1/[2 sqrt(pi)mu] exp(-(x*mu)^2) $$
+  !END_DOC
+  implicit none
+  double precision, intent(in):: x
+  double precision, intent(in):: mu
+  ! OUTPUT
+  double precision :: u12_mu
+  u12_mu = 0.5d0 * x * (1.d0 - derf(mu*x)) - 0.5d0 * inv_sq_pi/mu *  dexp(-x*mu*x*mu)
+end function
+
+
 pure function deriv_j12_r12(r1,r2,mu) result(deriv)
   !BEGIN_DOC
   ! d/dr12 j(mu,r12)
