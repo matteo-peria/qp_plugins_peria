@@ -109,7 +109,7 @@ subroutine get_adaptive_grid( r                                            &
         weight_knowles = derivative_knowles_function(a_knowles, m_knowles, x) &
                       & *knowles_function(a_knowles, m_knowles, x)**2
         ! Quadrature weight * Becke partitioning weight
-        print*,'becke_weights',becke_weights_at_float_grid(k,i,i_nucl),x
+        !print*,'becke_weights',becke_weights_at_float_grid(k,i,i_nucl),x
         float_grid_weights(k,i,i_nucl) = becke_weights_at_float_grid(k,i,i_nucl) &
                                       & *weights_angular_adapt_points(k)  &
                                       & *weight_knowles*dr_adapt_radial_integral

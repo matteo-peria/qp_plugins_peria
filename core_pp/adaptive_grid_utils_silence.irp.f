@@ -136,7 +136,7 @@
   becke_weights_at_float_grid(:,:,:) = 0.d0
   
   ! Loop over all points belonging to real atoms grid (fixed grid)
-    print*,'fixed'
+  !print*,'fixed'
   do i_nucl = 1, nucl_num
     do k = 1, n_points_rad_extra_grid - 1
       do l = 1, n_points_ang_extra_grid
@@ -147,7 +147,7 @@
         !becke_weights_at_fixed_grid(l,k,i_nucl) = weights_per_atom(i_nucl+1)
         becke_weights_at_fixed_grid(l,k,i_nucl) = weights_per_atom(i_nucl+1)
          
-         write(*,'(3I4,2(E13.6))') i_nucl, k, l, becke_weights_at_fixed_grid(l,k,i_nucl),grid_points_extra_radial(k)
+         !write(*,'(3I4,2(E13.6))') i_nucl, k, l, becke_weights_at_fixed_grid(l,k,i_nucl),grid_points_extra_radial(k)
       enddo
     enddo
   enddo
@@ -156,7 +156,7 @@
     ! No becke weights are computed for the floating grid, which is suppressed
   else
     ! Loop over all points belonging to ghost-atom grid (floating grid)
-    print*,'floating'
+    !print*,'floating'
     i_nucl = 1
     do k = 1, n_points_rad_float_grid - 1
       do l = 1, n_points_ang_float_grid 
@@ -164,7 +164,7 @@
         !print*, "CALL GET_BECKE_FUNCTIONS_GENERAL2(R,RP,FLOAT_GRID_BECKE_BOUNDARY_SHIFT, NUCL_NUM+1, WEIGHTS_PER_ATOM)"
         call get_becke_functions_general2(r,rp,float_grid_becke_boundary_shift, nucl_num+1, weights_per_atom)
         becke_weights_at_float_grid(l,k,i_nucl) = weights_per_atom(i_nucl)
-         write(*,'(3I4,E13.6)') i_nucl, k, l, becke_weights_at_float_grid(l,k,i_nucl)
+         !write(*,'(3I4,E13.6)') i_nucl, k, l, becke_weights_at_float_grid(l,k,i_nucl)
         
         if(isnan(becke_weights_at_float_grid(l,k,i_nucl))) then
           print*,'isnan(becke_weights_at_float_grid(l,k,i_nucl))'
@@ -365,8 +365,8 @@ double precision function cell_function_becke_general_adapt2(r                  
     nu_ij = mu_ij + slater_inter_per_input(atom_number) * (1.d0 - mu_ij*mu_ij)
     ! Update Becke-weight with j-th atom contribution
     cell_function_becke_general_adapt2 *= step_function_becke(nu_ij)
-    write(*,'(100(F16.6,X))'),r_j,r_i,R_ij,mu_ij,nu_ij,slater_inter_per_input(atom_number)
-    !write(*,'(100E13.4)'), r_j, mu_ij, nu_ij, cell_function_becke_general_adapt2
+    !write(*,'(100(F16.6,X))'),r_j,r_i,R_ij,mu_ij,nu_ij,slater_inter_per_input(atom_number)
+    !!write(*,'(100E13.4)'), r_j, mu_ij, nu_ij, cell_function_becke_general_adapt2
   end if
  
   return
