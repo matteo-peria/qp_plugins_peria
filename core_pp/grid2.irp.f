@@ -3,7 +3,6 @@
 
   BEGIN_DOC
   ! n_points_rad_grid2 = number of radial grid points per atom
-  !
   ! n_points_ang_grid2 = number of angular grid points per atom
   !
   ! These numbers are automatically set by setting the grid_type_sgn parameter
@@ -99,9 +98,9 @@ BEGIN_PROVIDER [double precision, grid_points_per_atom2, (3,n_points_ang_grid2,n
 
         ! explicit values of the grid points centered around each atom
         do k = 1, n_points_ang_grid2
-          grid_points_per_atom2(1,k,j,i) = x_ref + angular_quadrature_points(k,1) * r
-          grid_points_per_atom2(2,k,j,i) = y_ref + angular_quadrature_points(k,2) * r
-          grid_points_per_atom2(3,k,j,i) = z_ref + angular_quadrature_points(k,3) * r
+          grid_points_per_atom2(1,k,j,i) = x_ref + grid2_lebedev_points(k,1) * r
+          grid_points_per_atom2(2,k,j,i) = y_ref + grid2_lebedev_points(k,2) * r
+          grid_points_per_atom2(3,k,j,i) = z_ref + grid2_lebedev_points(k,3) * r
         enddo
       enddo
     enddo
@@ -119,9 +118,9 @@ BEGIN_PROVIDER [double precision, grid_points_per_atom2, (3,n_points_ang_grid2,n
 
         ! explicit values of the grid points centered around each atom
         do k = 1, n_points_ang_grid2
-          grid_points_per_atom2(1,k,j,i) = x_ref + angular_quadrature_points(k,1) * r
-          grid_points_per_atom2(2,k,j,i) = y_ref + angular_quadrature_points(k,2) * r
-          grid_points_per_atom2(3,k,j,i) = z_ref + angular_quadrature_points(k,3) * r
+          grid_points_per_atom2(1,k,j,i) = x_ref + grid2_lebedev_points(k,1) * r
+          grid_points_per_atom2(2,k,j,i) = y_ref + grid2_lebedev_points(k,2) * r
+          grid_points_per_atom2(3,k,j,i) = z_ref + grid2_lebedev_points(k,3) * r
         enddo
       enddo
     enddo
@@ -160,9 +159,7 @@ BEGIN_PROVIDER [double precision, weight_at_r2, (n_points_ang_grid2,n_points_rad
     do k = 1, n_points_rad_grid2 -1
       ! for each angular point attached to the "jth" atom
       do l = 1, n_points_ang_grid2
-        r(1) = grid_points_per_atom2(1,l,k,j)
-        r(2) = grid_points_per_atom2(2,l,k,j)
-        r(3) = grid_points_per_atom2(3,l,k,j)
+        r(1:3) = grid_points_per_atom2(1:3,l,k,j)
 
         accu = 0.d0
         ! For each of these points in space, ou need to evaluate the P_n(r)
@@ -224,12 +221,12 @@ BEGIN_PROVIDER [double precision, final_weight_at_r2, (n_points_ang_grid2,n_poin
           contrib_integration = derivative_knowles_function(alpha_knowles(grid_atomic_number(j)), m_knowles, x) &
                               * knowles_function(alpha_knowles(grid_atomic_number(j)), m_knowles, x)**2
 
-          final_weight_at_r2(k,i,j) = weights_angular_points(k)  * weight_at_r2(k,i,j) * contrib_integration * dr_radial_integral2
+          final_weight_at_r2(k,i,j) = grid2_lebedev_weights(k)  * weight_at_r2(k,i,j) * contrib_integration * dr_radial_integral2
 
           if(isnan(final_weight_at_r2(k,i,j))) then
            print*,'isnan(final_weight_at_r2(k,i,j))' 
            print*,k,i,j
-           write(*,'(100(F16.10,X))') weights_angular_points(k), weight_at_r2(k,i,j), contrib_integration
+           write(*,'(100(F16.10,X))') grid2_lebedev_weights(k), weight_at_r2(k,i,j), contrib_integration
            stop 
           endif
         enddo
@@ -246,12 +243,12 @@ BEGIN_PROVIDER [double precision, final_weight_at_r2, (n_points_ang_grid2,n_poin
       do i = 1, n_points_rad_grid2 - 1 !for each radial grid attached to the "jth" atom
         contrib_integration = tmp * dble(i-1)**5 / dble(n_points_rad_grid2-i+1)**7
         do k = 1, n_points_ang_grid2  ! for each angular point attached to the "jth" atom
-          final_weight_at_r2(k,i,j) = weights_angular_points(k) * weight_at_r2(k,i,j) * contrib_integration
+          final_weight_at_r2(k,i,j) = grid2_lebedev_weights(k) * weight_at_r2(k,i,j) * contrib_integration
 
           if(isnan(final_weight_at_r2(k,i,j))) then
            print*,'isnan(final_weight_at_r2(k,i,j))' 
            print*,k,i,j
-           write(*,'(100(F16.10,X))') weights_angular_points(k), weight_at_r2(k,i,j), contrib_integration, dr_radial_integral2
+           write(*,'(100(F16.10,X))') grid2_lebedev_weights(k), weight_at_r2(k,i,j), contrib_integration, dr_radial_integral2
            stop 
           endif
         enddo
@@ -266,5 +263,203 @@ BEGIN_PROVIDER [double precision, final_weight_at_r2, (n_points_ang_grid2,n_poin
   endif
 
 END_PROVIDER
+
+
+! this is the vectorial version
+BEGIN_PROVIDER [integer, n_points_final_grid2]
+
+  BEGIN_DOC
+  ! Number of points which are non zero
+  END_DOC
+
+  implicit none
+  integer :: i, j, k, l
+
+
+  write(6,*) 'PROVIDING n_points_final_grid2 ...'
+  write(6,*) '... through pruning of PROVIDER final_weight_at_r2'
+
+  n_points_final_grid2 = 0
+  do j = 1, nucl_num
+    do i = 1, n_points_rad_grid2 -1
+      do k = 1, n_points_ang_grid2
+        !if(dabs(final_weight_at_r(k,i,j)) < thresh_grid)then
+        if(dabs(final_weight_at_r2(k,i,j)) < thresh_grid)then
+          cycle
+        endif
+        n_points_final_grid2 += 1
+      enddo
+    enddo
+  enddo
+  call write_int(6, n_points_ang_grid2*(n_points_rad_grid2*nucl_num-1), 'N points before pruning')
+  call write_int(6, n_points_final_grid2, 'N points after pruning')
+
+!!!  print*,' n_points_final_grid2 = ', n_points_final_grid2
+!!!  print*,' n max point         = ', n_points_ang_grid2*(n_points_rad_grid2*nucl_num - 1)
+!!! ! no reason to write in the EZFIO file the number of grid points ?
+!!!!  call ezfio_set_becke_numerical_grid_n_points_final_grid2(n_points_final_grid2)
+!!!
+END_PROVIDER
+
+! ---
+
+ BEGIN_PROVIDER [double precision, final_grid_points2,      (3,n_points_final_grid2)]
+&BEGIN_PROVIDER [double precision, final_weight_at_r_vector2, (n_points_final_grid2)]
+&BEGIN_PROVIDER [integer,          index_final_points2,     (3,n_points_final_grid2)]
+&BEGIN_PROVIDER [integer, index_final_points_reverse2, (n_points_ang_grid2,n_points_rad_grid2,nucl_num)]
+
+  BEGIN_DOC
+  !  final_grid_points2(1:3,j) = (/ x, y, z /) of the jth grid point
+  !
+  ! final_weight_at_r_vector2(i) = Total weight function of the ith grid point which contains the Lebedev, Voronoi and radial weights contributions
+  !
+  ! index_final_points2(1:3,i) = gives the angular, radial and atomic indices associated to the ith grid point
+  !
+  ! index_final_points_reverse2(i,j,k) = index of the grid point having i as angular, j as radial and l as atomic indices
+  END_DOC
+
+  implicit none
+  integer          :: i, j, k, l, i_count
+  double precision :: r(3)
+  double precision :: wall0, wall1
+
+  call wall_time(wall0)
+  print *, ' Providing final_grid_points2 ...'
+
+  i_count = 0
+  do j = 1, nucl_num
+    do i = 1, n_points_rad_grid2 -1
+      do k = 1, n_points_ang_grid2
+        if(dabs(final_weight_at_r2(k,i,j)) < thresh_grid) then
+          cycle
+        endif
+        i_count += 1
+        final_grid_points2(1:3,i_count) = grid_points_per_atom2(1:3,k,i,j)
+        index_final_points2(1,i_count) = k
+        index_final_points2(2,i_count) = i
+        index_final_points2(3,i_count) = j
+        index_final_points_reverse2(k,i,j) = i_count
+      enddo
+    enddo
+  enddo
+
+!  FREE grid_points_per_atom
+!  FREE final_weight_at_r2
+
+  call wall_time(wall1)
+  print *, ' wall time for final_grid_points2,', wall1 - wall0
+  call print_memory_usage()
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER [double precision, final_grid_points_transp2, (n_points_final_grid2,3)]
+
+  BEGIN_DOC
+  ! Transposed final_grid_points2
+  END_DOC
+
+  implicit none
+  integer :: i,j
+
+  do j = 1, 3
+    do i = 1, n_points_final_grid2
+      final_grid_points_transp2(i,j) = final_grid_points2(j,i)
+    enddo
+  enddo
+
+END_PROVIDER
+
+
+
+! AOs and MOs IN R2
+
+
+BEGIN_PROVIDER[double precision, aos_in_r_array2, (ao_num,n_points_final_grid2)]
+
+  BEGIN_DOC
+  ! aos_in_r_array2(i,j) = value of the ith ao on the jth grid point
+  END_DOC
+
+  implicit none
+  integer          :: i
+
+  !$OMP PARALLEL DO               &
+  !$OMP DEFAULT (NONE)            &
+  !$OMP PRIVATE (i) &
+  !$OMP SHARED(aos_in_r_array2,n_points_final_grid2,final_grid_points2)
+  do i = 1, n_points_final_grid2
+    call give_all_aos_at_r(final_grid_points2(1,i), aos_in_r_array2(1,i))
+  enddo
+  !$OMP END PARALLEL DO
+
+END_PROVIDER
+
+! ---
+
+BEGIN_PROVIDER[double precision, aos_in_r_array2_transp, (n_points_final_grid2,ao_num)]
+
+  BEGIN_DOC
+  ! aos_in_r_array2_transp(i,j) = value of the jth ao on the ith grid point
+  END_DOC
+
+  implicit none
+  integer          :: i, j
+  double precision :: aos_array(ao_num), r(3)
+
+  do i = 1, n_points_final_grid2
+    do j = 1, ao_num
+      aos_in_r_array2_transp(i,j) = aos_in_r_array2(j,i)
+    enddo
+  enddo
+
+END_PROVIDER
+
+
+BEGIN_PROVIDER[double precision, mos_in_r_array2, (mo_num,n_points_final_grid2)]
+ implicit none
+ BEGIN_DOC
+ ! mos_in_r_array2(i,j)        = value of the ith mo on the jth grid point
+ END_DOC
+ integer :: i,j
+ double precision :: mos_array(mo_num), r(3)
+ do i = 1, n_points_final_grid2
+  r(1:3) = final_grid_points2(1:3,i)
+  call give_all_mos_at_r(r,mos_array)
+  do j = 1, mo_num
+   mos_in_r_array2(j,i) = mos_array(j)
+  enddo
+ enddo
+ END_PROVIDER
+
+
+ BEGIN_PROVIDER[double precision, mos_in_r_array2_omp, (mo_num,n_points_final_grid2)]
+ implicit none
+ BEGIN_DOC
+ ! mos_in_r_array2(i,j)        = value of the ith mo on the jth grid point
+ END_DOC
+ integer :: i
+ !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE (i) & 
+ !$OMP SHARED(mos_in_r_array2_omp,n_points_final_grid2,mo_num,final_grid_points2)
+ do i = 1, n_points_final_grid2
+  call give_all_mos_at_r(final_grid_points2(1,i),mos_in_r_array2_omp(1,i))
+ enddo
+ !$OMP END PARALLEL DO
+ END_PROVIDER
+
+
+ BEGIN_PROVIDER[double precision, mos_in_r_array2_transp,(n_points_final_grid2,mo_num)]
+ implicit none
+ BEGIN_DOC
+ ! mos_in_r_array2_transp(i,j) = value of the jth mo on the ith grid point
+ END_DOC
+ integer :: i,j
+ do i = 1, n_points_final_grid2
+  do j = 1, mo_num
+   mos_in_r_array2_transp(i,j) = mos_in_r_array2_omp(j,i) 
+  enddo
+ enddo
+ END_PROVIDER
 
 

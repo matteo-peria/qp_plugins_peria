@@ -76,7 +76,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid122, (ao_num, ao_num, ao_num, a
             ao_k_r1 = aos_in_r_array(k,i1)
             do i = 1, ao_num
               ao_i_r1 = aos_in_r_array(i,i1)
-              core_tcxc_grid122(i,k,l,j) += ao_i_r1*ao_k_r1*w1 * v_x_core_ao_j_tc*ao_l_r2*w2
+              core_tcxc_grid122(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1  *  w2 * j_factor * ao_l_r2 * v_x_core_ao_j_tc
             enddo
           enddo
         enddo
@@ -218,7 +218,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid112, (ao_num, ao_num, ao_num, a
             ao_k_r1 = aos_in_r_array(k,i1)
             do i = 1, ao_num
               ao_i_r1 = aos_in_r_array(i,i1)
-              core_tcxc_grid122(i,k,l,j) += ao_i_r1*ao_k_r1*w1 * v_x_core_ao_j_tc*ao_l_r2*w2
+              core_tcxc_grid122(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 * w2 * j_factor * ao_l_r2 * v_x_core_ao_j_tc
             enddo
           enddo
         enddo

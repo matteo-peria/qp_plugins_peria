@@ -12,7 +12,7 @@ program core_tcxc_test
   call test_tcxc_j0_grid112
   !call test_tcxc_j0_grid123
 
-end program
+end program core_tcxc_test
 
 subroutine test_ao_overlap_exact_vs_numeric
   use iso_fortran_env, only: out_unit => output_unit
@@ -157,56 +157,56 @@ subroutine test_tcxc_j0_grid112
 end subroutine test_tcxc_j0_grid112
 
 
-subroutine test_tcxc_j0_grid123
-  implicit none
-  BEGIN_DOC
-  ! Check that, when the Jastrow factor is equal to zero,
-  ! the numerically-evaluated core exchange potential in a TC context
-  ! is the same as a product of standard overlap and exchange integrals (non-TC)
-  ! Expected value is also evaluated numerically
-  END_DOC
-  double precision :: difference
-
-  write(*,*) 
-
-  write(*,'(A)') repeat('=', 70)
-
-  write(*,*) "TEST 2"
-  write(*,*) "core_tcxc_grid123 VS core_tcxc_j0_grid123"
-
-  write(*,*) "Grid 1: usual, size = ", n_points_final_grid
-  write(*,*) "Grid 2: usual, size = ", n_points_final_grid
-  write(*,*) "Grid 3: extra, size = ", n_points_extra_final_grid
-
-  write(*,*) "Expected sizes:"
-  write(*,*) "ao_num              = ", ao_num
-  write(*,*) "ao_num^4            = ", ao_num*ao_num*ao_num*ao_num
-  write(*,*) "size(core_tcxc...)  = ", size(core_tcxc_grid123)
-  write(*,*) 
-
-  write(*,*) "Jastrow e^{±J}=1 imposed throught the EZFIO interface param"
-  write(*,*) "core_tcxc_j0_testing = ", core_tcxc_j0_testing
-  write(*,*) "(true is expected when testing)"
-  write(*,*) "mu_erf = ", mu_erf
-  write(*,*) "(value is ignored when Jastrow is 1 when testing)"
-
-  write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-
-  difference = sum(abs(core_tcxc_grid123(:,:,:,:) - core_tcxc_j0_grid123(:,:,:,:)))
-
-  write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid123)
-
-  write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-  write(*,*) "CORE_TCXC_GRID123, CORE_TCXC_J0_EXACT"
-
-  difference = sum(abs(core_tcxc_grid123(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
-
-  write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid122)
-
-  write(*,*) 
-
-end subroutine test_tcxc_j0_grid123
+!subroutine test_tcxc_j0_grid123
+!  implicit none
+!  BEGIN_DOC
+!  ! Check that, when the Jastrow factor is equal to zero,
+!  ! the numerically-evaluated core exchange potential in a TC context
+!  ! is the same as a product of standard overlap and exchange integrals (non-TC)
+!  ! Expected value is also evaluated numerically
+!  END_DOC
+!  double precision :: difference
+!
+!  write(*,*) 
+!
+!  write(*,'(A)') repeat('=', 70)
+!
+!  write(*,*) "TEST 2"
+!  write(*,*) "core_tcxc_grid123 VS core_tcxc_j0_grid123"
+!
+!  write(*,*) "Grid 1: usual, size = ", n_points_final_grid
+!  write(*,*) "Grid 2: usual, size = ", n_points_final_grid
+!  write(*,*) "Grid 3: extra, size = ", n_points_extra_final_grid
+!
+!  write(*,*) "Expected sizes:"
+!  write(*,*) "ao_num              = ", ao_num
+!  write(*,*) "ao_num^4            = ", ao_num*ao_num*ao_num*ao_num
+!  write(*,*) "size(core_tcxc...)  = ", size(core_tcxc_grid123)
+!  write(*,*) 
+!
+!  write(*,*) "Jastrow e^{±J}=1 imposed throught the EZFIO interface param"
+!  write(*,*) "core_tcxc_j0_testing = ", core_tcxc_j0_testing
+!  write(*,*) "(true is expected when testing)"
+!  write(*,*) "mu_erf = ", mu_erf
+!  write(*,*) "(value is ignored when Jastrow is 1 when testing)"
+!
+!  write(*,*) 
+!  write(*,*) "... computing the difference between the providers"
+!
+!  difference = sum(abs(core_tcxc_grid123(:,:,:,:) - core_tcxc_j0_grid123(:,:,:,:)))
+!
+!  write(*,*) "Difference =           ", difference
+!  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid123)
+!
+!  write(*,*) 
+!  write(*,*) "... computing the difference between the providers"
+!  write(*,*) "CORE_TCXC_GRID123, CORE_TCXC_J0_EXACT"
+!
+!  difference = sum(abs(core_tcxc_grid123(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
+!
+!  write(*,*) "Difference =           ", difference
+!  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid122)
+!
+!  write(*,*) 
+!
+!end subroutine test_tcxc_j0_grid123
