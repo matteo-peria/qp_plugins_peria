@@ -2,7 +2,6 @@ program core_tcxc_adapt_test
 
   BEGIN_DOC
   ! Testing the core exchange potential integral in TC
-  ! remember to compare with OVERLAP * USUAL CORE-XC
   END_DOC
 
   implicit none
@@ -59,13 +58,14 @@ subroutine test_tcxc_adapt_j0_grid123
   write(*,*) "Difference =           ", difference
   write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_j0_grid123)
 
-  write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-  write(*,*) "CORE_TCXC_ADAPT_GRID123, CORE_TCXC_J0_EXACT"
-
-  difference = sum(abs(core_tcxc_adapt_grid123(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
-
-  write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_j0_grid123)
+!  ! THE EXACT INTEGRAL IS NOT READY YET
+!  write(*,*) 
+!  write(*,*) "... computing the difference between the providers"
+!  write(*,*) "CORE_TCXC_ADAPT_GRID123, CORE_TCXC_J0_EXACT"
+!
+!  difference = sum(abs(core_tcxc_adapt_grid123(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
+!
+!  write(*,*) "Difference =           ", difference
+!  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_j0_grid123)
 
 end subroutine test_tcxc_adapt_j0_grid123

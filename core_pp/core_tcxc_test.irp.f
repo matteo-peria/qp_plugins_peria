@@ -2,7 +2,6 @@ program core_tcxc_test
 
   BEGIN_DOC
   ! Testing the core exchange potential integral in TC
-  ! remember to compare with OVERLAP * USUAL CORE-XC
   END_DOC
 
   implicit none
@@ -90,14 +89,15 @@ subroutine test_tcxc_j0_grid122
   write(*,*) "Difference =           ", difference
   write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid122)
 
-  write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-  write(*,*) "CORE_TCXC_GRID122, CORE_TCXC_J0_EXACT"
-
-  difference = sum(abs(core_tcxc_grid122(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
-
-  write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid122)
+! THE EXACT PROVIDER DOES NOT MAKE SENSE. NEED TO BE FIXED
+!  write(*,*) 
+!  write(*,*) "... computing the difference between the providers"
+!  write(*,*) "CORE_TCXC_GRID122, CORE_TCXC_J0_EXACT"
+!
+!  difference = sum(abs(core_tcxc_grid122(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
+!
+!  write(*,*) "Difference =           ", difference
+!  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid122)
 
 end subroutine test_tcxc_j0_grid122
 
@@ -140,70 +140,16 @@ subroutine test_tcxc_j0_grid112
   write(*,*) "Difference =           ", difference
   write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid112)
 
-  write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-  write(*,*) "CORE_TCXC_GRID112, CORE_TCXC_J0_EXACT"
-
-  difference = sum(abs(core_tcxc_grid112(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
-
-  write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid122)
-
-  write(*,*) 
-
-end subroutine test_tcxc_j0_grid112
-
-
-!subroutine test_tcxc_j0_grid123
-!  implicit none
-!  BEGIN_DOC
-!  ! Check that, when the Jastrow factor is equal to zero,
-!  ! the numerically-evaluated core exchange potential in a TC context
-!  ! is the same as a product of standard overlap and exchange integrals (non-TC)
-!  ! Expected value is also evaluated numerically
-!  END_DOC
-!  double precision :: difference
-!
-!  write(*,*) 
-!
-!  write(*,'(A)') repeat('=', 70)
-!
-!  write(*,*) "TEST 2"
-!  write(*,*) "core_tcxc_grid123 VS core_tcxc_j0_grid123"
-!
-!  write(*,*) "Grid 1: usual, size = ", n_points_final_grid
-!  write(*,*) "Grid 2: usual, size = ", n_points_final_grid
-!  write(*,*) "Grid 3: extra, size = ", n_points_extra_final_grid
-!
-!  write(*,*) "Expected sizes:"
-!  write(*,*) "ao_num              = ", ao_num
-!  write(*,*) "ao_num^4            = ", ao_num*ao_num*ao_num*ao_num
-!  write(*,*) "size(core_tcxc...)  = ", size(core_tcxc_grid123)
-!  write(*,*) 
-!
-!  write(*,*) "Jastrow e^{±J}=1 imposed throught the EZFIO interface param"
-!  write(*,*) "core_tcxc_j0_testing = ", core_tcxc_j0_testing
-!  write(*,*) "(true is expected when testing)"
-!  write(*,*) "mu_erf = ", mu_erf
-!  write(*,*) "(value is ignored when Jastrow is 1 when testing)"
-!
+! THE EXACT PROVIDER DOES NOT MAKE SENSE. NEED TO BE FIXED
 !  write(*,*) 
 !  write(*,*) "... computing the difference between the providers"
+!  write(*,*) "CORE_TCXC_GRID112, CORE_TCXC_J0_EXACT"
 !
-!  difference = sum(abs(core_tcxc_grid123(:,:,:,:) - core_tcxc_j0_grid123(:,:,:,:)))
-!
-!  write(*,*) "Difference =           ", difference
-!  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid123)
-!
-!  write(*,*) 
-!  write(*,*) "... computing the difference between the providers"
-!  write(*,*) "CORE_TCXC_GRID123, CORE_TCXC_J0_EXACT"
-!
-!  difference = sum(abs(core_tcxc_grid123(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
+!  difference = sum(abs(core_tcxc_grid112(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
 !
 !  write(*,*) "Difference =           ", difference
 !  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid122)
 !
 !  write(*,*) 
-!
-!end subroutine test_tcxc_j0_grid123
+
+end subroutine test_tcxc_j0_grid112

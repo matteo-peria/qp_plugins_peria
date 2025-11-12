@@ -9,7 +9,7 @@
 ! In our case, when we are in the loop of the index of particle 2, let's
 ! say 'j', we need to make a call to another computation-heavy function.
 ! Therefore, it is better to put that loop as the most external one,
-! so that the call is made only once and used several times.A
+! so that the call is made only once and used several times.
 ! It may be convenient to access the 4d storing array accordingly, and 
 ! put the order of the index as
 !
