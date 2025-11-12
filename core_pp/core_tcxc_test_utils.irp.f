@@ -25,15 +25,27 @@ BEGIN_PROVIDER [ double precision, core_tcxc_j0_grid122, (ao_num, ao_num, ao_num
   core_tcxc_j0_grid122(:,:,:,:) = 0.d0
 
   ! do-loop version of the tensor product
-  do l = 1, ao_num
-    do k = 1, ao_num
-      do j = 1, ao_num
+  ! WRONG ORDER?
+  !do l = 1, ao_num
+  !  do k = 1, ao_num
+  !    do j = 1, ao_num
+  !      do i = 1, ao_num
+  !        core_tcxc_j0_grid122(i,j,k,l) = ao_overlap_grid1(i,k) * core_xpot_grid22(j,l)
+  !      end do
+  !    end do
+  !  end do
+  !end do
+
+  do j = 1, ao_num
+    do l = 1, ao_num
+      do k = 1, ao_num
         do i = 1, ao_num
-          core_tcxc_j0_grid122(i,j,k,l) = ao_overlap_grid1(i,k) * core_xpot_grid22(j,l)
+          core_tcxc_j0_grid122(i,k,l,j) = ao_overlap_grid1(i,k) * core_xpot_grid22(j,l)
         end do
       end do
     end do
   end do
+
   !! vectorized version of the tensor product
   !core_tcxc_j0_grid122 = reshape( ao_overlap_grid1, shape=[ao_num,ao_num,1,1] ) &
   !                     * reshape( core_xpot_grid22, shape=[1,1,ao_num,ao_num] )
@@ -44,7 +56,7 @@ BEGIN_PROVIDER [ double precision, ao_overlap_grid1, (ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! TEST-ONLY PROVIDER.
-  ! Necessary for comparison where a numeric over usual grid AO overlap appears
+  ! Numerical evaluation of AOs overlap over usual grid
   ! $$ \int d1 \chi_k(1)^* \chi_i(1) 
   END_DOC
   integer :: i, k, i1
@@ -88,13 +100,13 @@ BEGIN_PROVIDER [ double precision, core_xpot_grid22, (ao_num, ao_num)]
   integer :: i2, i2p
     ! Indices of the points on grid 2 and 2' respectively
   double precision :: r2(3), w2
-    ! Point (r_2) and weight (dr_2) on grid 2
+    ! Point (r_2) and weight (dr2) on grid 2
   double precision :: r2p(3), w2p
-    ! Point (r'_2) and weight (dr'_2) on nested grid 2'
+    ! Point (r'_2) and weight (dr2') on nested grid 2'
   integer :: j , l
     ! AO indices
   double precision :: ao_l_r2, ao_j_r2p
-    ! Real values of AOs $\chi_l(r_2)$ and $\chi_j(r'_2)$
+    ! Real values of AOs $\chi_l(r_2)$ and $\chi_j(r2')$
   double precision :: distance
     ! Distance for Coulomb integral
   integer :: m, m_core
@@ -133,7 +145,7 @@ BEGIN_PROVIDER [ double precision, core_xpot_grid22, (ao_num, ao_num)]
             ! Retrieve l-th AO value at position r
             ao_l_r2 = aos_in_r_array_extra(l,i2)
             ! Update
-            core_xpot_grid22(l,j) += kernel * ao_j_r2p * ao_l_r2 * w2p * w2
+            core_xpot_grid22(l,j) += w2 * ao_l_r2 * w2p * kernel * ao_j_r2p / distance
           enddo
         enddo
       endif
@@ -164,15 +176,28 @@ BEGIN_PROVIDER [ double precision, core_tcxc_j0_grid112, (ao_num, ao_num, ao_num
   core_tcxc_j0_grid112(:,:,:,:) = 0.d0
 
   ! do-loop version of the tensor product
-  do l = 1, ao_num
-    do k = 1, ao_num
-      do j = 1, ao_num
+  ! WRONG ORDER?
+  !do l = 1, ao_num
+  !  do k = 1, ao_num
+  !    do j = 1, ao_num
+  !      do i = 1, ao_num
+  !        core_tcxc_j0_grid112(i,j,k,l) = ao_overlap_grid1(i,k) * core_xpot_grid12(j,l)
+  !      end do
+  !    end do
+  !  end do
+  !end do
+
+  do j = 1, ao_num
+    do l = 1, ao_num
+      do k = 1, ao_num
         do i = 1, ao_num
-          core_tcxc_j0_grid112(i,j,k,l) = ao_overlap_grid1(i,k) * core_xpot_grid22(j,l)
+          core_tcxc_j0_grid122(i,k,l,j) = ao_overlap_grid1(i,k) * core_xpot_grid12(j,l)
         end do
       end do
     end do
   end do
+
+
   !! vectorized version of the tensor product
   !core_tcxc_j0_grid112 = reshape( ao_overlap_grid1, shape=[ao_num,ao_num,1,1] ) &
   !                     * reshape( core_xpot_grid12, shape=[1,1,ao_num,ao_num] )
@@ -239,7 +264,7 @@ BEGIN_PROVIDER [ double precision, core_xpot_grid12, (ao_num, ao_num)]
             ! Retrieve l-th AO value at position r'
             ao_l_r2 = aos_in_r_array(l,i2)
             ! Update
-            core_xpot_grid12(l,j) += kernel * ao_j_r2p * ao_l_r2 * w2p * w2
+            core_xpot_grid12(l,j) += w2 * ao_l_r2 * w2p * kernel * ao_j_r2p / distance
           enddo
         enddo
       endif
@@ -274,11 +299,22 @@ BEGIN_PROVIDER [ double precision, core_tcxc_j0_exact, (ao_num, ao_num, ao_num, 
   core_tcxc_j0_exact = 0.d0
 
   ! do-loop tensor product
-  do l = 1, ao_num
-    do k = 1, ao_num
-      do j = 1, ao_num
+  ! WRONG ORDER?
+  !do l = 1, ao_num
+  !  do k = 1, ao_num
+  !    do j = 1, ao_num
+  !      do i = 1, ao_num
+  !        core_tcxc_j0_exact(i,j,k,l) = ao_overlap(i,k) * core_xpot_exact_ao(j,l)
+  !      end do
+  !    end do
+  !  end do
+  !end do
+
+  do j = 1, ao_num
+    do l = 1, ao_num
+      do k = 1, ao_num
         do i = 1, ao_num
-          core_tcxc_j0_exact(i,j,k,l) = ao_overlap(i,k) * core_xpot_exact_ao(j,l)
+          core_tcxc_j0_exact(i,k,l,j) = ao_overlap(i,k) * core_xpot_exact_ao(j,l)
         end do
       end do
     end do

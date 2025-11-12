@@ -67,6 +67,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
   core_tcxc_adapt_grid123(:,:,:,:) = 0.d0
 
   do i1 = 1, n_points_final_grid
+    write(*,*) "Loop 1: i1 = ", i1
     r1(1:3) = final_grid_points(1:3,i1)
     w1 = final_weight_at_r_vector(i1)
 ! COMMENTED BECAUSE THE EXTRA GRID NOW MUST BE PART OF THE ADAPTIVE
@@ -74,6 +75,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
 !      r2(1:3) = final_grid_points_extra(1:3,i2)
 !      w2 = final_weight_at_r_vector_extra(i2) 
     do i2 = 1, n_points_final_grid2
+      write(*,*) "Loop 2: i2 = ", i2
       r2(1:3) = final_grid_points2(1:3,i2)
       w2 = final_weight_at_r_vector2(i2)
 
@@ -92,7 +94,6 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
                             , grid_fixed_weights, grid_float_weights            &
                             , n_fixed_pts_effective, n_float_pts_effective      &
                             , n_pts_effective_max)
-      !write(*,*) "i1, i2, getting adaptive grid3", i1, i2
 
       !call get_adaptive_grid3( r2 &
       !                       , grid3_molec_r, grid_float_points, &
@@ -102,6 +103,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
       ! FLOATING grid contributions
       do i2p_rad = 1, n_points_rad_float_grid - 1
         do i2p_ang = 1, n_points_ang_float_grid
+          !write(*,*) "Loops 3 (float): i2p_rad = ", i2p_rad, "  i2p_ang = ", i2p_ang
           ! Find r'_2 point from i2p_rad, i2p_ang loop-indices
           r2p(1:3) = grid_float_points(1:3,i2p_ang,i2p_rad,1)
           distance = norm2(r2(1:3) - r2p(1:3))
@@ -150,6 +152,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
             integral = 0.d0
             ! Loop over all AO (j-th index, variable is r2p)
             do j = 1, ao_num
+              !write(*,*) "Loop 4.1: j-th AO = ", j
               ! Get value of the j-th orbital at r2p
               ao_j_r2p = aos_in_r2p(j)
 
@@ -166,6 +169,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
               kernel = 0.d0
               ! Loop over core orbitals to update the kernel
               do m = 1, n_core_pseudo_orb
+                !write(*,*) "Loop 5.a.1: m-th core-MO = ", m
                 m_core = list_core_pseudo(m)
                 ! Update kernel using all-MOs(r2p) array
                 kernel -= mos_in_r_array2_omp(m_core,i2) * mos_in_r2p(m_core)    
@@ -176,11 +180,13 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
               integral += kernel * j_r1r2p * ao_j_r2p * w2p / distance 
               !
               do l = 1, ao_num
-                !ao_l_r2 = aos_in_r_array_extra(l,i2)
+                !write(*,*) "Loop 5.b.1: l-th AO = ", l
                 ao_l_r2 = aos_in_r_array2(l,i2)
                 do k = 1, ao_num
+                  !write(*,*) "Loop 6.1: k-th AO = ", k
                   ao_k_r1 = aos_in_r_array(k,i1)
                   do i = 1, ao_num
+                    !write(*,*) "Loop 7.1: i-th AO = ", i
                     ao_i_r1 = aos_in_r_array(i,i1)
                     core_tcxc_adapt_grid123(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 * w2 * j_r1r2 * ao_l_r2 * integral
                   enddo
@@ -292,6 +298,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
       do i2p_nuc = 1, nucl_num
         do i2p_rad = 1, n_points_extra_radial_grid - 1
           do i2p_ang = 1, n_points_extra_integration_angular
+            !write(*,*) "Loops 3 (extra): i2p_nuc = ", i2p_nuc, "  i2p_rad = ", i2p_rad, "  i2p_ang = ", i2p_ang
             r2p(1:3) = grid_points_extra_per_atom(1:3,i2p_ang,i2p_rad,i2p_nuc)
             distance = norm2(r2(1:3) - r2p(1:3))
             ! Compute matrix element only when there is no divergence 
@@ -303,6 +310,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
               integral = 0.d0
               ! Loop over all AO (j-th index, variable is r2p)
               do j = 1, ao_num
+                !write(*,*) "Loop 4.2: j-th AO = ", j
                 ! Get value of the j-th orbital at r2p
                 ao_j_r2p = aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
                 ! Compute pair Jastrow factor between r1 and r2p
@@ -325,11 +333,14 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
                 ! Update of the integral at each new point r2p
                 integral += kernel * j_r1r2p * ao_j_r2p * w2p / distance 
                 do l = 1, ao_num
+                  !write(*,*) "Loop 5.b.2: l-th AO = ", l
                   !ao_l_r2 = aos_in_r_array_extra(l,i2)
                   ao_l_r2 = aos_in_r_array2(l,i2)
                   do k = 1, ao_num
+                    !write(*,*) "Loop 6.2: k-th AO = ", k
                     ao_k_r1 = aos_in_r_array(k,i1)
                     do i = 1, ao_num
+                      !write(*,*) "Loop 7.2: i-th AO = ", i
                       ao_i_r1 = aos_in_r_array(i,i1)
                       core_tcxc_adapt_grid123(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 * w2 * j_r1r2 * ao_l_r2 * integral
                     enddo

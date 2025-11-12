@@ -7,12 +7,22 @@ program core_tcxc_test
 
   implicit none
 
+  write(*,'(A)') repeat('=', 70)
+  write(*,*) "TEST 0"
   call test_ao_overlap_exact_vs_numeric
+
+  write(*,*) 
+  write(*,'(A)') repeat('=', 70)
+  write(*,*) "TEST 1"
   call test_tcxc_j0_grid122
+
+  write(*,*) 
+  write(*,'(A)') repeat('=', 70)
+  write(*,*) "TEST 2"
   call test_tcxc_j0_grid112
-  !call test_tcxc_j0_grid123
 
 end program core_tcxc_test
+
 
 subroutine test_ao_overlap_exact_vs_numeric
   use iso_fortran_env, only: out_unit => output_unit
@@ -23,10 +33,6 @@ subroutine test_ao_overlap_exact_vs_numeric
   double precision :: difference
 
 
-  write(*,*) 
-
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST"
   write(*,*) "ao_overlap_grid1 VS ao_overlap"
   
   write(*,*) "Depending on ao_num..."
@@ -57,11 +63,6 @@ subroutine test_tcxc_j0_grid122
   END_DOC
   double precision :: difference
 
-  write(*,*) 
-
-  write(*,'(A)') repeat('=', 70)
-
-  write(*,*) "TEST 1"
   write(*,*) "core_tcxc_grid122 VS core_tcxc_j0_grid122"
 
   write(*,*) "Grid 1: usual, size = ", n_points_final_grid
@@ -112,11 +113,6 @@ subroutine test_tcxc_j0_grid112
   END_DOC
   double precision :: difference
 
-  write(*,*) 
-
-  write(*,'(A)') repeat('=', 70)
-
-  write(*,*) "TEST 2"
   write(*,*) "core_tcxc_grid112 VS core_tcxc_j0_grid112"
 
   write(*,*) "Grid 1: usual, size = ", n_points_final_grid
@@ -137,6 +133,7 @@ subroutine test_tcxc_j0_grid112
 
   write(*,*) 
   write(*,*) "... computing the difference between the providers"
+  write(*,*) "CORE_TCXC_GRID112, CORE_TCXC_J0_GRID112"
 
   difference = sum(abs(core_tcxc_grid112(:,:,:,:) - core_tcxc_j0_grid112(:,:,:,:)))
 

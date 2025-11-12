@@ -217,15 +217,27 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_j0_grid123, (ao_num, ao_num, 
   core_tcxc_adapt_j0_grid123(:,:,:,:) = 0.d0
 
   ! do-loop version of the tensor product
-  do l = 1, ao_num
-    do k = 1, ao_num
-      do j = 1, ao_num
+  ! WRONG ORDER?
+  !do l = 1, ao_num
+  !  do k = 1, ao_num
+  !    do j = 1, ao_num
+  !      do i = 1, ao_num
+  !        core_tcxc_adapt_j0_grid123(i,j,k,l) = ao_overlap_grid1(i,k) * core_xpot_adapt_grid23(j,l)
+  !      end do
+  !    end do
+  !  end do
+  !end do
+
+  do j = 1, ao_num
+    do l = 1, ao_num
+      do k = 1, ao_num
         do i = 1, ao_num
-          core_tcxc_adapt_j0_grid123(i,j,k,l) = ao_overlap_grid1(i,k) * core_xpot_adapt_grid23(j,l)
+          core_tcxc_adapt_j0_grid123(i,k,l,j) = ao_overlap_grid1(i,k) * core_xpot_adapt_grid23(j,l)
         end do
       end do
     end do
   end do
+
   !! vectorized version of the tensor product
   !core_tcxc_j0_grid123 = reshape( ao_overlap_grid1, shape=[ao_num,ao_num,1,1] ) &
   !                     * reshape( core_xpot_grid22, shape=[1,1,ao_num,ao_num] )

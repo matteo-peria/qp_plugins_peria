@@ -36,7 +36,7 @@
   !if (verbose) then 
   !  print*, " n_points_rad_grid2         = ", n_points_rad_grid2
   !  print*, " n_points_ang_grid2 = ", n_points_ang_grid2
-  write(6,*) 'Grid parameters:'
+  write(6,*) 'Grid2 parameters:'
   call write_int(6, n_points_rad_grid2, 'N radial points ')
   call write_int(6, n_points_ang_grid2, 'N angular points') 
   write(6,*) ''      
