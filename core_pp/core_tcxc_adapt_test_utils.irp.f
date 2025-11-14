@@ -68,101 +68,56 @@ BEGIN_PROVIDER [ double precision, core_xpot_adapt_grid23, (ao_num, ao_num)]
                           , n_fixed_pts_effective, n_float_pts_effective      &
                           , n_pts_effective_max)
 
-    ! FLOATING grid contributions
-    do i2p_rad = 1, n_points_rad_float_grid - 1
-      do i2p_ang = 1, n_points_ang_float_grid
-        ! Find r'_2 point from i2p_rad, i2p_ang loop-indices
-        r2p(1:3) = grid_float_points(1:3,i2p_ang,i2p_rad,1)
-        distance = norm2(r2(1:3) - r2p(1:3))
-        ! Compute matrix element only when there is no divergence 
-        if (distance.gt.1.d-10) then
-          ! Find r'_2 weight from i2p loop-index
-          w2p = grid_float_weights(i2p_ang,i2p_rad,1)
-          ! Compute all AOs in r2p 
-          call give_all_aos_at_r(r2p, aos_in_r2p)
+    ! Loop over all AO (j-th index, variable is r2p)
+    do j = 1, ao_num
+      ! Initialise 3rd nested integral
+      integral = 0.d0
 
-          ! For MOs, 3 alternatives:
-          ! 1) Compute all-MOs at the new floating grid point r2p
-          !    This is the LEAST CONVENIENT.
-          !    Cons:
-          !    - matrix product involves bigger matrices (all MOs)
-          !    - internally it calls give_all_aos_at_r, which was just called 
-          !      in the line above
-          !    Pro:
-          !    + recycle tested software
-          call give_all_mos_at_r(r2p, mos_in_r2p)
-
-          ! 2) Compute all-MOs starting from already computed AOs
-          !    Cons:
-          !    - no tested. Are you sure of what you are doing?
-          !    - matrix product involves bigger matrices (all MOs)
-          !    Pro:
-          !    + recycle aos_in_r2p, just called above
-          !call dgemv( 'T'
-          !          , mo_num, ao_num, 1.d0, mo_coef
-          !          , mo_num, aos_in_r2p, 1
-          !          , 0.d0, mos_in_r2p, 1)
-
-          ! 3) Compute core-only-MOs starting from already computed AOs
-          !    This should be the MOST CONVENIENT.
-          !    Cons:
-          !    - no tested. Are you sure of what you are doing?
-          !    Pro:
-          !    + matrix product involves smaller matrices (just core-MOs)
-          !    + recycle aos_in_r2p, just called above
-          !call dgemv( 'T'                                             &
-          !          , n_core_pseudo_orb, ao_num, 1.d0, mo_core_coef,  &
-          !          , n_core_pseudo_orb, aos_in_r2p, 1                &
-          !          , 0.d0, mos_core_in_r2p, 1)
-
-          ! Initialize Jastrow-weighted nested core-valence exchange integral
-          integral = 0.d0
-          ! Loop over all AO (j-th index, variable is r2p)
-          do j = 1, ao_num
+      ! FLOATING grid contributions
+      do i2p_rad = 1, n_points_rad_float_grid - 1
+        do i2p_ang = 1, n_points_ang_float_grid
+          ! Find r'_2 point from i2p_rad, i2p_ang loop-indices
+          r2p(1:3) = grid_float_points(1:3,i2p_ang,i2p_rad,1)
+          distance = norm2(r2(1:3) - r2p(1:3))
+          ! Compute matrix element only when there is no divergence 
+          if (distance.gt.1.d-10) then
+            ! Find r'_2 weight from i2p loop-index
+            w2p = grid_float_weights(i2p_ang,i2p_rad,1)
+            ! Compute all AOs in r2p 
+            call give_all_aos_at_r(r2p, aos_in_r2p)
             ! Get value of the j-th orbital at r2p
             ao_j_r2p = aos_in_r2p(j)
+            ! Get the core-MOs at r2p reciclying the newly computed AOs in r2p
+            ! and using only the the sub-matrix of core-MOs coefficients
+            call dgemv( 'N', n_core_pseudo_orb, ao_num, 1.d0 &
+                      , mo_core_coef_notnorm_transp, n_core_pseudo_orb &
+                      , aos_in_r2p, 1, 0.d0, mos_core_in_r2p, 1)
 
             ! Initialize kernel
             kernel = 0.d0
             ! Loop over core orbitals to update the kernel
             do m = 1, n_core_pseudo_orb
+              !write(*,*) "Loop 5.a.1: m-th core-MO = ", m
               m_core = list_core_pseudo(m)
-              ! Update kernel using all-MOs(r2p) array
-              kernel -= mos_in_r_array2_omp(m_core,i2) * mos_in_r2p(m_core)    
               ! Update kernel using core-MOs(r2p) array
-              !kernel -= mos_in_r_array2_omp(m_core,i2) * mos_core_in_r2p(m)    
+              kernel -= mos_in_r_array2_omp(m_core,i2) * mos_core_in_r2p(m)    
             enddo
-            kernel = kernel/distance
             ! Update of the integral at each new point r2p
-            integral += kernel * ao_j_r2p * w2p
-            ! Loop over all AO (l-th index, variable is r2)
-            do l = 1, ao_num
-              ao_l_r2 = aos_in_r_array2(l,i2)
-              core_xpot_adapt_grid23(l,j) += w2 * ao_l_r2 * integral
-            enddo
+            integral += kernel * ao_j_r2p * w2p / distance 
+          end if
+        end do
+      end do
 
-          enddo
-        endif
-
-      enddo
-    enddo
-
-    ! FIXED GRID3 contributions 
-    ! (BASED ON A FULL GRID EXTRA)
-    do i2p_nuc = 1, nucl_num
-      do i2p_rad = 1, n_points_extra_radial_grid - 1
-        do i2p_ang = 1, n_points_extra_integration_angular
-          r2p(1:3) = grid_points_extra_per_atom(1:3,i2p_ang,i2p_rad,i2p_nuc)
-          distance = norm2(r2(1:3) - r2p(1:3))
-          ! Compute matrix element only when there is no divergence 
-          if (distance.gt.1.d-10) then
-            ! NOTICE: THE WEIGHTS ON THE EXTRA GRID ARE UPDATED FOR THE ADAPTIVE GRID 
-            w2p = grid_fixed_weights(i2p_ang,i2p_rad,i2p_nuc)
-
-            ! Initialise 3rd nested integral
-            integral = 0.d0
-            ! Loop over all AO (j-th index, variable is r2p)
-            do j = 1, ao_num
+      ! FIXED GRID contributions 
+      do i2p_nuc = 1, nucl_num
+        do i2p_rad = 1, n_points_extra_radial_grid - 1
+          do i2p_ang = 1, n_points_extra_integration_angular
+            r2p(1:3) = grid_points_extra_per_atom(1:3,i2p_ang,i2p_rad,i2p_nuc)
+            distance = norm2(r2(1:3) - r2p(1:3))
+            ! Compute matrix element only when there is no divergence 
+            if (distance.gt.1.d-10) then
+              ! NOTICE: THE WEIGHTS ON THE EXTRA GRID ARE UPDATED FOR THE ADAPTIVE GRID 
+              w2p = grid_fixed_weights(i2p_ang,i2p_rad,i2p_nuc)
               ! Get value of the j-th orbital at r2p
               ao_j_r2p = aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
 
@@ -176,19 +131,18 @@ BEGIN_PROVIDER [ double precision, core_xpot_adapt_grid23, (ao_num, ao_num)]
 
               ! Update of the integral at each new point r2p
               integral += kernel * ao_j_r2p * w2p / distance 
-              do l = 1, ao_num
-                ao_l_r2 = aos_in_r_array2(l,i2)
-                core_xpot_adapt_grid23(l,j) += w2 * ao_l_r2 * integral
-              enddo
+            end if
+          end do
+        end do
+      end do
 
-            enddo
-          endif
-
-        enddo
+      do l = 1, ao_num
+        ao_l_r2 = aos_in_r_array2(l,i2)
+        core_xpot_adapt_grid23(l,j) += w2 * ao_l_r2 * integral
       enddo
-    enddo
 
-  enddo 
+    enddo  ! loop over j
+  enddo  ! loop oveer r2
 
 END_PROVIDER
 
@@ -208,8 +162,8 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_j0_grid123, (ao_num, ao_num, 
   !          \braket{k|i} \braket{l| V_{x,\text{core}} |j} $$
   !
   ! 1st integral is computed along usual grid
-  ! 2nd integral is computed along extra grid
-  ! 3rd integral is computed along extra grid
+  ! 2nd integral is computed along grid2
+  ! 3rd integral is computed along adaptive grid (floating + extra grid)
   END_DOC
   integer :: i,j,k,l
 
@@ -217,17 +171,6 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_j0_grid123, (ao_num, ao_num, 
   core_tcxc_adapt_j0_grid123(:,:,:,:) = 0.d0
 
   ! do-loop version of the tensor product
-  ! WRONG ORDER?
-  !do l = 1, ao_num
-  !  do k = 1, ao_num
-  !    do j = 1, ao_num
-  !      do i = 1, ao_num
-  !        core_tcxc_adapt_j0_grid123(i,j,k,l) = ao_overlap_grid1(i,k) * core_xpot_adapt_grid23(j,l)
-  !      end do
-  !    end do
-  !  end do
-  !end do
-
   do j = 1, ao_num
     do l = 1, ao_num
       do k = 1, ao_num
