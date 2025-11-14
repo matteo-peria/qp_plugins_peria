@@ -1,5 +1,32 @@
- BEGIN_PROVIDER [ double precision, mo_core_coef   , (ao_num, n_core_pseudo_orb) ]
-&BEGIN_PROVIDER [ double precision, mo_val_coef, (ao_num, n_valence_pseudo_orb) ]
+ BEGIN_PROVIDER [ double precision, mo_core_coef_notnorm,        (ao_num, n_core_pseudo_orb) ]
+&BEGIN_PROVIDER [ double precision, mo_val_coef_notnorm,         (ao_num, n_valence_pseudo_orb) ]
+&BEGIN_PROVIDER [ double precision, mo_core_coef_notnorm_transp, (n_core_pseudo_orb, ao_num) ]
+&BEGIN_PROVIDER [ double precision, mo_val_coef_notnorm_transp,  (n_valence_pseudo_orb, ao_num) ]
+
+  implicit none
+  BEGIN_DOC
+  ! Core MOs' coefficients on |AO| basis set. NOT NORMALIZED
+  ! Valence MOs' coefficients on |AO| basis set. NOT NORMALIZED
+  !
+  ! mo_core_nn_coef_notnorm(i,j) = coefficient of the i-th |AO| on the j-th core |MO|
+  ! mo_val_nn_coef_notnorm(i,j) = coefficient of the i-th |AO| on the j-th valence |MO|
+  END_DOC
+
+  ! Array slicing solution
+  mo_core_coef_notnorm = mo_coef(:,list_core_pseudo)
+  mo_val_coef_notnorm  = mo_coef(:,list_valence_pseudo)  
+
+  ! Transpose
+  mo_core_coef_notnorm_transp = transpose(mo_core_coef_notnorm)
+  mo_val_coef_notnorm_transp = transpose(mo_val_coef_notnorm)
+ END_PROVIDER
+
+
+ BEGIN_PROVIDER [ double precision, mo_core_coef,        (ao_num, n_core_pseudo_orb) ]
+&BEGIN_PROVIDER [ double precision, mo_val_coef,         (ao_num, n_valence_pseudo_orb) ]
+&BEGIN_PROVIDER [ double precision, mo_core_coef_transp, (n_core_pseudo_orb, ao_num) ]
+&BEGIN_PROVIDER [ double precision, mo_val_coef_transp,  (n_valence_pseudo_orb, ao_num) ]
+
   implicit none
   BEGIN_DOC
   ! Core MOs' coefficients on |AO| basis set
@@ -8,16 +35,26 @@
   ! mo_core_coef(i,j) = coefficient of the i-th |AO| on the jth core |MO|
   ! mo_val_coef(i,j) = coefficient of the i-th |AO| on the jth valence |MO|
   END_DOC
-  integer :: i
 
+  !! ARRAY SLICING SOLUTION
   !mo_core_coef = mo_coef(:,list_core_pseudo)
   !mo_val_coef = mo_coef(:,list_valence_pseudo)  
+  !! Normalization
+  !integer :: row
+  !double precision :: norm_core_mos(n_core_pseudo_orb)
+  !double precision :: norm_valence_mos(n_valence_pseudo_orb)
+  !norm_core_mos(:)    = norm2(mo_core_coef_notnorm(:,:), dim=1)
+  !norm_valence_mos(:) = norm2(mo_val_coef_notnorm(:,:), dim=1)
+  !do row = 1, ao_num 
+  !  mo_core_coef(row,:) = mo_core_coef_notnorm(row,:) / norm_core_mos(:)    
+  !  mo_val_coef(row,:)  = mo_val_coef_notnorm(row,:)  / norm_valence_mos(:) 
+  !end do
 
+  ! LOOP SOLUTION
+  integer :: i
   do i=1, n_core_pseudo_orb
     mo_core_coef(:,i) = mo_coef(:,list_core_pseudo(i))  
   end do
-
-
   do i=1, n_valence_pseudo_orb
     mo_val_coef(:,i) = mo_coef(:,list_valence_pseudo(i))  
   end do
@@ -33,6 +70,10 @@
     norm = sqrt(dot_product(mo_val_coef(:,col),mo_val_coef(:,col)))
     mo_val_coef(:,col) = mo_val_coef(:,col)/norm
   end do
+
+  ! Transpose
+  mo_core_coef_transp = transpose(mo_core_coef)
+  mo_val_coef_transp = transpose(mo_val_coef)
  END_PROVIDER
 
 

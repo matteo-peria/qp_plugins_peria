@@ -1,18 +1,41 @@
-program aos_valence_test
-
+program mos_valence_test
+  implicit none
   BEGIN_DOC
   ! TODO : Put the documentation of the program here
   END_DOC
 
+  !call old_test()
+  call mos_loop_vs_array_slicing
+
+end program mos_valence_test
+
+subroutine mos_loop_vs_array_slicing
   implicit none
+  double precision :: diff
 
-  call main()
+  double precision :: mo_core_coef_normed(ao_num, n_core_pseudo_orb)
+  double precision :: mo_val_coef_normed(ao_num, n_valence_pseudo_orb)
 
-end program
+  double precision :: norm_core_mos(n_core_pseudo_orb)
+  double precision :: norm_valence_mos(n_valence_pseudo_orb)
+  norm_core_mos(:)    = norm2(mo_core_coef_notnorm(:,:), dim=1)
+  norm_valence_mos(:) = norm2(mo_val_coef_notnorm(:,:), dim=1)
 
-! ---
+  integer :: row
+  do row = 1, ao_num 
+    mo_core_coef_normed(row,:) = mo_core_coef_notnorm(row,:) / norm_core_mos(:)    
+    mo_val_coef_normed(row,:)  = mo_val_coef_notnorm(row,:)  / norm_valence_mos(:) 
+  end do
 
-subroutine main()
+  diff = sum(abs(mo_core_coef_normed - mo_core_coef))
+  write(*,*) "Difference MOs core from array slicing and loops: ", diff 
+  diff = sum(abs(mo_val_coef_normed - mo_val_coef))
+  write(*,*) "Difference MOs valence from array slicing and loops: ", diff 
+
+end subroutine mos_loop_vs_array_slicing
+
+
+subroutine old_test
   implicit none
 
   integer :: row,col
