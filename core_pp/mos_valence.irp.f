@@ -1,6 +1,31 @@
 
 use bitmasks
 
+ BEGIN_PROVIDER [ double precision, mo_core_coef_notnorm,        (ao_num, n_core_pseudo_orb) ]
+&BEGIN_PROVIDER [ double precision, mo_val_coef_notnorm,         (ao_num, n_valence_pseudo_orb) ]
+&BEGIN_PROVIDER [ double precision, mo_core_coef_notnorm_transp, (n_core_pseudo_orb, ao_num) ]
+&BEGIN_PROVIDER [ double precision, mo_val_coef_notnorm_transp,  (n_valence_pseudo_orb, ao_num) ]
+
+  implicit none
+  BEGIN_DOC
+  ! Core MOs' coefficients on |AO| basis set. NOT NORMALIZED
+  ! Valence MOs' coefficients on |AO| basis set. NOT NORMALIZED
+  !
+  ! mo_core_nn_coef_notnorm(i,j) = coefficient of the i-th |AO| on the j-th core |MO|
+  ! mo_val_nn_coef_notnorm(i,j) = coefficient of the i-th |AO| on the j-th valence |MO|
+  END_DOC
+
+  ! Array slicing solution
+  mo_core_coef_notnorm = mo_coef(:,list_core_pseudo)
+  mo_val_coef_notnorm  = mo_coef(:,list_valence_pseudo)  
+
+  ! Transpose
+  mo_core_coef_notnorm_transp = transpose(mo_core_coef_notnorm)
+  mo_val_coef_notnorm_transp = transpose(mo_val_coef_notnorm)
+ END_PROVIDER
+
+
+
  BEGIN_PROVIDER [ double precision, mo_core_coef   , (ao_num, n_core_pseudo_orb) ]
 &BEGIN_PROVIDER [ double precision, mo_val_coef, (ao_num, n_valence_pseudo_orb) ]
   implicit none
