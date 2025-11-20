@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, core_xpot_adapt_grid23, (ao_num, ao_num)]
+BEGIN_PROVIDER [ double precision, core_xpot_adapt_grid2aj, (ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! Numerical evaluation of
@@ -52,15 +52,17 @@ BEGIN_PROVIDER [ double precision, core_xpot_adapt_grid23, (ao_num, ao_num)]
   integer :: n_float_pts_effective
   integer :: n_pts_effective_max
 
+
   ! Initialize floating grid points and weights
   grid_float_points(:,:,:,:) = 0.d0
   grid_float_weights(:,:,:) = 0.d0
 
-  core_xpot_adapt_grid23(:,:) = 0.d0
+  core_xpot_adapt_grid2aj(:,:) = 0.d0
 
   do i2 = 1, n_points_final_grid2
     r2(1:3) = final_grid_points2(1:3,i2)
     w2 = final_weight_at_r_vector2(i2)
+    !write(*,*) "i2 = ", i2, "; w2 = ", w2
 
     ! Compute adaptive grid centered in r2
     call get_adaptive_grid( r2, grid_points_extra_per_atom, grid_float_points &
@@ -68,88 +70,99 @@ BEGIN_PROVIDER [ double precision, core_xpot_adapt_grid23, (ao_num, ao_num)]
                           , n_fixed_pts_effective, n_float_pts_effective      &
                           , n_pts_effective_max)
 
-    ! Loop over all AO (j-th index, variable is r2p)
-    do j = 1, ao_num
-      ! Initialise 3rd nested integral
-      integral = 0.d0
 
-      ! FLOATING grid contributions
-      do i2p_rad = 1, n_points_rad_float_grid - 1
-        do i2p_ang = 1, n_points_ang_float_grid
-          ! Find r'_2 point from i2p_rad, i2p_ang loop-indices
-          r2p(1:3) = grid_float_points(1:3,i2p_ang,i2p_rad,1)
+    ! FLOATING grid contributions
+    do i2p_rad = 1, n_points_rad_float_grid - 1
+      do i2p_ang = 1, n_points_ang_float_grid
+        ! Find r2p point from i2p_rad, i2p_ang loop-indices
+        r2p(1:3) = grid_float_points(1:3,i2p_ang,i2p_rad,1)
+        distance = norm2(r2(1:3) - r2p(1:3))
+        ! Compute matrix element only when there is no divergence 
+        if (distance.gt.1.d-10) then
+          ! Find r'_2 weight from i2p loop-index
+          w2p = grid_float_weights(i2p_ang,i2p_rad,1)
+          !write(*,*) "i2p_rad = ", i2p_rad, "; i2p_ang = ", i2p_ang, "; w2p = ", w2p
+          ! Compute all AOs in r2p 
+          call give_all_aos_at_r(r2p, aos_in_r2p)
+
+          ! Get the core-MOs at r2p reciclying the newly computed AOs in r2p
+          ! and using only the the sub-matrix of core-MOs coefficients
+          call dgemv( 'N', n_core_pseudo_orb, ao_num, 1.d0 &
+                    , mo_core_coef_notnorm_transp, n_core_pseudo_orb &
+                    , aos_in_r2p, 1, 0.d0, mos_core_in_r2p, 1)
+
+
+          ! Initialize kernel
+          kernel = 0.d0
+          ! Loop over core orbitals to update the kernel
+          do m = 1, n_core_pseudo_orb
+            m_core = list_core_pseudo(m)
+            !! Update kernel using all-MOs(r2p) array
+            !kernel -= mos_in_r_array2_omp(m_core,i2) * mos_in_r2p(m_core)    
+            ! Update kernel using core-MOs(r2p) array
+            kernel -= mos_in_r_array2_omp(m_core,i2) * mos_core_in_r2p(m)    
+          enddo
+          kernel = kernel / distance
+
+          ! Loop over all AO (j-th index, variable is r2p)
+          do j = 1, ao_num
+            ao_j_r2p = aos_in_r2p(j)
+            do l = 1, ao_num
+              ao_l_r2 = aos_in_r_array2(l,i2)
+    
+              core_xpot_adapt_grid2aj(l,j) += w2 * ao_l_r2             &
+                                                 * w2p * kernel * ao_j_r2p
+            enddo
+          enddo
+
+        end if
+
+      end do  ! grid 3 floating
+    end do    ! grid 3 floating
+
+    ! FIXED GRID3 contributions 
+    ! (this grid3 is based on a provider called grid2 because we are recycling)
+    do i2p_nuc = 1, nucl_num
+      do i2p_rad = 1, n_points_extra_radial_grid - 1
+        do i2p_ang = 1, n_points_extra_integration_angular
+          r2p(1:3) = grid_points_extra_per_atom(1:3,i2p_ang,i2p_rad,i2p_nuc)
           distance = norm2(r2(1:3) - r2p(1:3))
           ! Compute matrix element only when there is no divergence 
           if (distance.gt.1.d-10) then
-            ! Find r'_2 weight from i2p loop-index
-            w2p = grid_float_weights(i2p_ang,i2p_rad,1)
-            ! Compute all AOs in r2p 
-            call give_all_aos_at_r(r2p, aos_in_r2p)
-            ! Get value of the j-th orbital at r2p
-            ao_j_r2p = aos_in_r2p(j)
-            ! Get the core-MOs at r2p reciclying the newly computed AOs in r2p
-            ! and using only the the sub-matrix of core-MOs coefficients
-            call dgemv( 'N', n_core_pseudo_orb, ao_num, 1.d0 &
-                      , mo_core_coef_notnorm_transp, n_core_pseudo_orb &
-                      , aos_in_r2p, 1, 0.d0, mos_core_in_r2p, 1)
+            ! NOTICE: THE WEIGHTS ON THE EXTRA GRID ARE UPDATED FOR THE ADAPTIVE GRID 
+            w2p = grid_fixed_weights(i2p_ang,i2p_rad,i2p_nuc)
 
             ! Initialize kernel
             kernel = 0.d0
             ! Loop over core orbitals to update the kernel
             do m = 1, n_core_pseudo_orb
-              !write(*,*) "Loop 5.a.1: m-th core-MO = ", m
               m_core = list_core_pseudo(m)
-              ! Update kernel using core-MOs(r2p) array
-              kernel -= mos_in_r_array2_omp(m_core,i2) * mos_core_in_r2p(m)    
+              kernel -= mos_in_r_array2_omp(m_core,i2) * mos_in_r_array_extra_full_omp(m_core,i2p_ang,i2p_rad,i2p_nuc)
             enddo
-            ! Update of the integral at each new point r2p
-            integral += kernel * ao_j_r2p * w2p / distance 
+            kernel = kernel/distance
+
+            ! Loop over all AO (j-th index, variable is r2p)
+            do j = 1, ao_num
+              ao_j_r2p = aos_in_r2p(j)
+              do l = 1, ao_num
+                ao_l_r2 = aos_in_r_array2(l,i2)
+                core_xpot_adapt_grid2aj(l,j) += w2 * ao_l_r2             &
+                                                   * w2p * kernel * ao_j_r2p
+              enddo   ! l
+            enddo   ! j
+
           end if
-        end do
-      end do
 
-      ! FIXED GRID contributions 
-      do i2p_nuc = 1, nucl_num
-        do i2p_rad = 1, n_points_extra_radial_grid - 1
-          do i2p_ang = 1, n_points_extra_integration_angular
-            r2p(1:3) = grid_points_extra_per_atom(1:3,i2p_ang,i2p_rad,i2p_nuc)
-            distance = norm2(r2(1:3) - r2p(1:3))
-            ! Compute matrix element only when there is no divergence 
-            if (distance.gt.1.d-10) then
-              ! NOTICE: THE WEIGHTS ON THE EXTRA GRID ARE UPDATED FOR THE ADAPTIVE GRID 
-              w2p = grid_fixed_weights(i2p_ang,i2p_rad,i2p_nuc)
-              ! Get value of the j-th orbital at r2p
-              ao_j_r2p = aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
+        end do  ! grid 3 fixed
+      end do    ! grid 3 fixed
+    end do      ! grid 3 fixed
 
-              ! Initialize kernel
-              kernel = 0.d0
-              ! Loop over core orbitals to update the kernel
-              do m = 1, n_core_pseudo_orb
-                m_core = list_core_pseudo(m)
-                kernel -= mos_in_r_array2_omp(m_core,i2) * mos_in_r_array_extra_full_omp(m_core,i2p_ang,i2p_rad,i2p_nuc)
-              enddo
-
-              ! Update of the integral at each new point r2p
-              integral += kernel * ao_j_r2p * w2p / distance 
-            end if
-          end do
-        end do
-      end do
-
-      do l = 1, ao_num
-        ao_l_r2 = aos_in_r_array2(l,i2)
-        core_xpot_adapt_grid23(l,j) += w2 * ao_l_r2 * integral
-      enddo
-
-    enddo  ! loop over j
-  enddo  ! loop oveer r2
+  enddo ! grid 2
 
 END_PROVIDER
 
 
-
-
-BEGIN_PROVIDER [ double precision, core_tcxc_adapt_j0_grid123, (ao_num, ao_num, ao_num, ao_num)]
+BEGIN_PROVIDER [ double precision, core_tcxc_adapt_j0_grid12aj, (ao_num, ao_num, ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! TEST-ONLY PROVIDER.
@@ -168,14 +181,14 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_j0_grid123, (ao_num, ao_num, 
   integer :: i,j,k,l
 
   ! Initialization
-  core_tcxc_adapt_j0_grid123(:,:,:,:) = 0.d0
+  core_tcxc_adapt_j0_grid12aj(:,:,:,:) = 0.d0
 
   ! do-loop version of the tensor product
   do j = 1, ao_num
     do l = 1, ao_num
       do k = 1, ao_num
         do i = 1, ao_num
-          core_tcxc_adapt_j0_grid123(i,k,l,j) = ao_overlap_grid1(i,k) * core_xpot_adapt_grid23(j,l)
+          core_tcxc_adapt_j0_grid12aj(i,k,l,j) = ao_overlap_grid1(i,k) * core_xpot_adapt_grid2aj(j,l)
         end do
       end do
     end do

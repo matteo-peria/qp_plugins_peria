@@ -1,4 +1,11 @@
-BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_num, ao_num)]
+! VARIANT WHERE: 
+! - FIRST WE LOOP ON THE ORBITAL J. 
+! - THEN WE LOOP OVER THE MOST NESTED GRID (THE 3RD INTEGRAL),
+!   WHICH IN THIS CASE COINCIDE WITH THE ADAPTIVE GRID (A)
+! HENCE THE NAME ENDING WITH 'JA'
+
+
+BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid12ja, (ao_num, ao_num, ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! Numerical evaluation of < kl | V^{\text{TC}}_{x,\text{core}}  | ij >
@@ -60,19 +67,29 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
   integer :: n_float_pts_effective
   integer :: n_pts_effective_max
 
+  double precision :: sum_w1, sum_ao_i_r1, sum_ao_k_r1, sum_w2, sum_ao_l_r2, sum_integral
+  
+  sum_w1=0.d0
+  sum_ao_i_r1=0.d0
+  sum_ao_k_r1=0.d0
+  sum_w2=0.d0
+  sum_ao_l_r2=0.d0
+  sum_integral=0.d0
+
   ! Initialize floating grid points and weights
   grid_float_points(:,:,:,:) = 0.d0
   grid_float_weights(:,:,:) = 0.d0
 
-  core_tcxc_adapt_grid123(:,:,:,:) = 0.d0
+  core_tcxc_adapt_grid12ja(:,:,:,:) = 0.d0
 
   do i1 = 1, n_points_final_grid
     r1(1:3) = final_grid_points(1:3,i1)
     w1 = final_weight_at_r_vector(i1)
+    !write(*,*) "i1 = ", i1, "; w1 = ", w1
     do i2 = 1, n_points_final_grid2
       r2(1:3) = final_grid_points2(1:3,i2)
       w2 = final_weight_at_r_vector2(i2)
-
+      !write(*,*) "i2 = ", i2, "; w2 = ", w2
       ! Compute pair Jastrow factor between r1 and r2
       if (core_tcxc_j0_testing) then
         j_r1r2 = 1.d0
@@ -102,6 +119,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
             if (distance.gt.1.d-10) then
               ! Find r'_2 weight from i2p loop-index
               w2p = grid_float_weights(i2p_ang,i2p_rad,1)
+              !write(*,*) "i2p_rad = ", i2p_rad, "; i2p_ang = ", i2p_ang, "; w2p = ", w2p
               ! Compute all AOs in r2p 
               call give_all_aos_at_r(r2p, aos_in_r2p)
               ! Get value of the j-th orbital at r2p
@@ -180,12 +198,29 @@ BEGIN_PROVIDER [ double precision, core_tcxc_adapt_grid123, (ao_num, ao_num, ao_
             ao_k_r1 = aos_in_r_array(k,i1)
             do i = 1, ao_num
               ao_i_r1 = aos_in_r_array(i,i1)
-              core_tcxc_adapt_grid123(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 * w2 * j_r1r2 * ao_l_r2 * integral
+
+          sum_w1               += w1                                        
+          sum_ao_i_r1          += ao_i_r1                                   
+          sum_ao_k_r1          += ao_k_r1                                   
+          sum_w2               += w2                                        
+          sum_ao_l_r2          += ao_l_r2                                   
+          sum_integral += integral
+
+              core_tcxc_adapt_grid12ja(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 * w2 * j_r1r2 * ao_l_r2 * integral
             enddo
           enddo
         enddo
       enddo
     enddo 
   enddo
+
+!  write(*,*) "sum_w1               ", sum_w1
+!  write(*,*) "sum_ao_i_r1          ", sum_ao_i_r1
+!  write(*,*) "sum_ao_k_r1          ", sum_ao_k_r1
+!  write(*,*) "sum_w2               ", sum_w2
+!  write(*,*) "sum_ao_l_r2          ", sum_ao_l_r2
+!  write(*,*) "sum_integral", sum_integral
+
+
 
 END_PROVIDER

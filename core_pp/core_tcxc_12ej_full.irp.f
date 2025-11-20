@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, core_tcxc_grid123, (ao_num, ao_num, ao_num, ao_num)]
+BEGIN_PROVIDER [ double precision, core_tcxc_grid12ej_full, (ao_num, ao_num, ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! Numerical evaluation of < kl | V^{\text{TC}}_{x,\text{core}}  | ij >
@@ -33,15 +33,15 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid123, (ao_num, ao_num, ao_num, a
   double precision :: distance
     ! Distance for Coulomb integral (exchange)
 
-  core_tcxc_grid123(:,:,:,:) = 0.d0
+  core_tcxc_grid12ej_full(:,:,:,:) = 0.d0
 
   do i1 = 1, n_points_final_grid
-    write(*,*) "Loop 1: i1 = ", i1
+    !write(*,*) "Loop 1: i1 = ", i1
     r1(1:3) = final_grid_points(1:3,i1)
     w1 = final_weight_at_r_vector(i1)
 
     do i2 = 1, n_points_final_grid2
-      write(*,*) "Loop 2: i2 = ", i2
+      !write(*,*) "Loop 2: i2 = ", i2
       r2(1:3) = final_grid_points2(1:3,i2)
       w2 = final_weight_at_r_vector2(i2)
 
@@ -52,10 +52,6 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid123, (ao_num, ao_num, ao_num, a
         j_r1r2 = exp(-j_mu_env(r1,r2,mu_erf))
       end if
 
-      ! Loop over all AO (j-th index, variable is r2p)
-      do j = 1, ao_num
-        ! Initialise 3rd nested integral
-        integral = 0.d0
         ! Loop over the 3rd grid
         do i2p_nuc = 1, nucl_num
           do i2p_rad = 1, n_points_extra_radial_grid - 1
@@ -66,8 +62,6 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid123, (ao_num, ao_num, ao_num, a
               ! Compute matrix element only when there is no divergence 
               if (distance.gt.1.d-10) then
                 w2p = final_weight_at_r_extra(i2p_ang,i2p_rad,i2p_nuc)
-                ! Get value of the j-th orbital at r2p
-                ao_j_r2p = aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
 
                 ! Compute pair Jastrow factor between r1 and r2p
                 if (core_tcxc_j0_testing) then
@@ -85,29 +79,37 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid123, (ao_num, ao_num, ao_num, a
                   m_core = list_core_pseudo(m)
                   kernel -= mos_in_r_array2_omp(m_core,i2) * mos_in_r_array_extra_full_omp(m_core,i2p_ang,i2p_rad,i2p_nuc)
                 enddo
+                kernel = kernel / distance
 
-                ! Update of the integral at each new point r2p
-                integral += kernel * j_r1r2p * ao_j_r2p * w2p / distance
+                ! Loop over all AO (j-th index, variable is r2p)
+                do j = 1, ao_num
+                  ! Get value of the j-th orbital at r2p
+                  ao_j_r2p = aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
+                  ! Update of the integral at each new point r2p
+                  integral = w2p * kernel * j_r1r2p * ao_j_r2p
+          
+                  do l = 1, ao_num
+                    !write(*,*) "Loop 5.b.2: l-th AO = ", l
+                    ao_l_r2 = aos_in_r_array2(l,i2)
+                    do k = 1, ao_num
+                      !write(*,*) "Loop 6.2: k-th AO = ", k
+                      ao_k_r1 = aos_in_r_array(k,i1)
+                      do i = 1, ao_num
+                        !write(*,*) "Loop 7.2: i-th AO = ", i
+                        ao_i_r1 = aos_in_r_array(i,i1)
+                        core_tcxc_grid12ej_full(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 &
+                                                          * w2 * j_r1r2 * ao_l_r2 * integral
+                      enddo ! loop i
+                    enddo  ! loop k
+                  enddo  ! loop l
+          
+                enddo  ! loop j
+
               endif
-            end do
-          end do
-        end do
 
-        do l = 1, ao_num
-          !write(*,*) "Loop 5.b.2: l-th AO = ", l
-          ao_l_r2 = aos_in_r_array2(l,i2)
-          do k = 1, ao_num
-            !write(*,*) "Loop 6.2: k-th AO = ", k
-            ao_k_r1 = aos_in_r_array(k,i1)
-            do i = 1, ao_num
-              !write(*,*) "Loop 7.2: i-th AO = ", i
-              ao_i_r1 = aos_in_r_array(i,i1)
-              core_tcxc_grid123(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 * w2 * j_r1r2 * ao_l_r2 * integral
-            enddo ! loop i
-          enddo  ! loop k
-        enddo  ! loop l
-
-      enddo  ! loop j
+            end do ! loop 3rd grid
+          end do   ! loop 3rd grid
+        end do     ! loop 3rd grid
 
     enddo  ! loop i2
   enddo  ! loop i1

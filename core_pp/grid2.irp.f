@@ -335,6 +335,8 @@ END_PROVIDER
         endif
         i_count += 1
         final_grid_points2(1:3,i_count) = grid_points_per_atom2(1:3,k,i,j)
+
+        final_weight_at_r_vector2(i_count) = final_weight_at_r2(k,i,j)
         index_final_points2(1,i_count) = k
         index_final_points2(2,i_count) = i
         index_final_points2(3,i_count) = j
