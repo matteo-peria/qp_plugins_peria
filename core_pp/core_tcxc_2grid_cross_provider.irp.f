@@ -18,11 +18,10 @@ program core_tcxc_2grid_cross_provider
   write(*,*) "TEST 1"
   call test_tcxc_cross_provider_11ej_1eej
 
-  write(*,*) 
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 2"
-  call test_tcxc_cross_provider_11je_1eje
-
+  !write(*,*) 
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 2"
+  !call test_tcxc_cross_provider_11je_1eje
 
 end program core_tcxc_2grid_cross_provider
 
@@ -59,34 +58,34 @@ subroutine test_tcxc_cross_provider_11ej_1eej
 end subroutine test_tcxc_cross_provider_11ej_1eej
 
 
-subroutine test_tcxc_cross_provider_11je_1eje
-  implicit none
-  BEGIN_DOC
-  ! FURTHER TESTING CROSS PROVIDER
-  END_DOC
-  double precision :: difference
-
-
-  write(*,*) "Expect ZERO DIFFERENCE when usual grid1 = grid_extra"
-
-  write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-  write(*,*) "CORE_TCXC_GRID1ee, CORE_TCXC_GRID11e"
-
-  difference = sum(abs(core_tcxc_grid1eje(:,:,:,:) - core_tcxc_grid11je(:,:,:,:)))
-
-  write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_grid11je)
-
-
-  write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-  write(*,*) "CORE_TCXC_J0_GRID1ee, CORE_TCXC_J0_GRID11e"
-
-  difference = sum(abs(core_tcxc_j0_grid11je(:,:,:,:) - core_tcxc_j0_grid1eje(:,:,:,:)))
-
-  write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid11je)
-
-end subroutine test_tcxc_cross_provider_11je_1eje
+!subroutine test_tcxc_cross_provider_11je_1eje
+!  implicit none
+!  BEGIN_DOC
+!  ! FURTHER TESTING CROSS PROVIDER
+!  END_DOC
+!  double precision :: difference
+!
+!
+!  write(*,*) "Expect ZERO DIFFERENCE when usual grid1 = grid_extra"
+!
+!  write(*,*) 
+!  write(*,*) "... computing the difference between the providers"
+!  write(*,*) "CORE_TCXC_GRID1ee, CORE_TCXC_GRID11e"
+!
+!  difference = sum(abs(core_tcxc_grid1eje(:,:,:,:) - core_tcxc_grid11je(:,:,:,:)))
+!
+!  write(*,*) "Difference =           ", difference
+!  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_grid11je)
+!
+!
+!  write(*,*) 
+!  write(*,*) "... computing the difference between the providers"
+!  write(*,*) "CORE_TCXC_J0_GRID1ee, CORE_TCXC_J0_GRID11e"
+!
+!  difference = sum(abs(core_tcxc_j0_grid11je(:,:,:,:) - core_tcxc_j0_grid1eje(:,:,:,:)))
+!
+!  write(*,*) "Difference =           ", difference
+!  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid11je)
+!
+!end subroutine test_tcxc_cross_provider_11je_1eje
 

@@ -18,78 +18,101 @@ program core_tcxc_adapt_test
   write(*,*) "mu_erf = ", mu_erf
   write(*,*) "(value is ignored when Jastrow is 1 when testing)"
 
-
   write(*,'(A)') repeat('=', 70)
   write(*,*) "TEST 1"
-  call test_tcxc_adapt_j0_grid12aj
+  call test_tcxc_j0_12a_12e
 
   write(*,'(A)') repeat('=', 70)
   write(*,*) "TEST 2"
-  call test_tcxc_adapt_j0_grid12ja
+  call test_tcxc_12aj_VS_j0
+
+  write(*,'(A)') repeat('=', 70)
+  write(*,*) "TEST 3"
+  call test_tcxc_grid12aj_grid12ej_full
+
+  write(*,'(A)') repeat('=', 70)
+  write(*,*) "TEST 4"
+  call test_tcxc_adapt_grid12aj_OMP_vs_BLAS
+
+  write(*,'(A)') repeat('=', 70)
+  write(*,*) "TEST 5"
+  call test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
+
 
 end program core_tcxc_adapt_test
 
-
-subroutine test_tcxc_adapt_j0_grid12aj
+subroutine test_tcxc_j0_12a_12e
   implicit none
-  BEGIN_DOC
-  ! Check that, when the Jastrow factor is equal to zero,
-  ! the numerically-evaluated core exchange potential in a TC context
-  ! is the same as a product of standard overlap and exchange integrals (non-TC)
-  ! Expected value is also evaluated numerically
-  END_DOC
   double precision :: difference
 
   write(*,*) 
+  write(*,*) "CORE_TCXC_ADAPT_J0_GRID12aj VS. CORE_TCXC_ADAPT_J0_GRID12ej "
 
-  write(*,*) "core_tcxc_adapt_grid12aj VS core_tcxc_adapt_j0_grid12aj"
+  difference = sum(abs(core_tcxc_adapt_j0_grid12aj(:,:,:,:) - core_tcxc_j0_grid12ej_full(:,:,:,:)))
+
+  write(*,*) "Difference =           ", difference
+  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_j0_grid12aj)
+
+end subroutine test_tcxc_j0_12a_12e
+
+
+subroutine test_tcxc_12aj_VS_j0
+  implicit none
+  double precision :: difference
 
   write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-  write(*,*) "CORE_TCXC_ADAPT_GRID12aj, CORE_TCXC_ADAPT_J0_GRID12aj"
+  write(*,*) "CORE_TCXC_ADAPT_GRID12aj VS. core_tcxc_adapt_j0_grid12aj"
 
   difference = sum(abs(core_tcxc_adapt_grid12aj(:,:,:,:) - core_tcxc_adapt_j0_grid12aj(:,:,:,:)))
 
   write(*,*) "Difference =           ", difference
   write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_j0_grid12aj)
 
-  !integer :: i, j, k, l
-  !do i = 1, ao_num
-  !do j = 1, ao_num
-  !do k = 1, ao_num
-  !do l = 1, ao_num
-  !if ((core_tcxc_adapt_grid12a(l,k,j,i) /= 0.d0).or.( core_tcxc_adapt_j0_grid12aj(l,k,j,i) /= 0.d0)) then
-  !write(*,*) l,k,j,i, core_tcxc_adapt_grid12a(l,k,j,i), core_tcxc_adapt_j0_grid12aj(l,k,j,i)
-  !end if
-  !end do
-  !end do
-  !end do
-  !end do
-
-end subroutine test_tcxc_adapt_j0_grid12aj
+end subroutine test_tcxc_12aj_VS_j0
 
 
-subroutine test_tcxc_adapt_j0_grid12ja
+subroutine test_tcxc_grid12aj_grid12ej_full
   implicit none
-  BEGIN_DOC
-  ! Check that, when the Jastrow factor is equal to zero,
-  ! the numerically-evaluated core exchange potential in a TC context
-  ! is the same as a product of standard overlap and exchange integrals (non-TC)
-  ! Expected value is also evaluated numerically
-  END_DOC
   double precision :: difference
 
   write(*,*) 
+  write(*,*) "CORE_TCXC_ADAPT_GRID12aj VS. CORE_TCXC_GRID12ej_FULL"
 
-  write(*,*) "core_tcxc_adapt_grid12ja VS core_tcxc_adapt_j0_grid12ja"
-
-  write(*,*) 
-  write(*,*) "... computing the difference between the providers"
-  write(*,*) "CORE_TCXC_ADAPT_GRID12ja, CORE_TCXC_ADAPT_J0_GRID12ja"
-
-  difference = sum(abs(core_tcxc_adapt_grid12ja(:,:,:,:) - core_tcxc_adapt_j0_grid12ja(:,:,:,:)))
+  difference = sum(abs(core_tcxc_adapt_grid12aj(:,:,:,:) - core_tcxc_grid12ej_full(:,:,:,:)))
 
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_j0_grid12ja)
+  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_j0_grid12aj)
 
-end subroutine test_tcxc_adapt_j0_grid12ja
+end subroutine test_tcxc_grid12aj_grid12ej_full
+
+
+subroutine test_tcxc_adapt_grid12aj_OMP_vs_BLAS
+  implicit none
+  double precision :: difference
+
+  write(*,*) 
+  write(*,*) "CORE_TCXC_ADAPT_GRID12aj VS. CORE_TCXC_ADAPT_GRID12aj_testing"
+
+  difference = sum(abs(core_tcxc_adapt_grid12aj(:,:,:,:) - core_tcxc_adapt_grid12aj_testing(:,:,:,:)))
+
+  write(*,*) "Difference =           ", difference
+  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_grid12aj)
+
+end subroutine test_tcxc_adapt_grid12aj_OMP_vs_BLAS
+
+
+subroutine test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
+  implicit none
+  double precision :: difference
+
+  write(*,*) 
+  write(*,*) "CORE_TCXC_GRID12ej_FULL VS. CORE_TCXC_ADAPT_GRID12aj_testing"
+
+  difference = sum(abs(core_tcxc_grid12ej_full(:,:,:,:) - core_tcxc_adapt_grid12aj_testing(:,:,:,:)))
+
+  write(*,*) "Difference =           ", difference
+  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_grid12ej_full)
+
+end subroutine test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
+
+
