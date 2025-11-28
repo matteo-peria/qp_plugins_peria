@@ -6,6 +6,10 @@ program core_tcxc_adapt_test
 
   implicit none
 
+  ! Provide this stuff to avoid output later
+  PROVIDE final_grid_points2 mo_num n_core_pseudo_orb n_valence_pseudo_orb
+  PROVIDE list_core_pseudo list_valence_pseudo list_core_pseudo_reverse list_valence_pseudo_reverse
+
   write(*,*) "1st grid: grid1,           size = ", n_points_final_grid
   write(*,*) "2nd grid: grid2,           size = ", n_points_final_grid2
   write(*,*) "3rd grid: adaptive"
@@ -18,28 +22,48 @@ program core_tcxc_adapt_test
   write(*,*) "mu_erf = ", mu_erf
   write(*,*) "(value is ignored when Jastrow is 1 when testing)"
 
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 1"
-  call test_tcxc_j0_12a_12e
 
   write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 2"
-  call test_tcxc_12aj_VS_j0
+  write(*,*) "TEST 0"
+  call test_tcxc_core_xpot
 
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 3"
-  call test_tcxc_grid12aj_grid12ej_full
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 1"
+  !call test_tcxc_j0_12a_12e
 
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 4"
-  call test_tcxc_adapt_grid12aj_OMP_vs_BLAS
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 2"
+  !call test_tcxc_12aj_VS_j0
 
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 5"
-  call test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 3"
+  !call test_tcxc_grid12aj_grid12ej_full
 
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 4"
+  !call test_tcxc_adapt_grid12aj_OMP_vs_BLAS
+
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 5"
+  !call test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
+
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 6"
+  !call test_tcxc_adapt_grid12aj_OMP_vs_j0
 
 end program core_tcxc_adapt_test
+
+
+subroutine test_tcxc_core_xpot
+  implicit none
+  double precision :: difference
+  write(*,*) 
+  write(*,*) "core_xpot_adapt_grid2aj VS. core_xpot_grid2ej_full"
+  difference = sum(abs(core_xpot_adapt_grid2aj(:,:) - core_xpot_grid2ej_full(:,:)))
+  write(*,*) "Difference =           ", difference
+  write(*,*) "Difference/n_entries = ", difference/size(core_xpot_adapt_grid2aj)
+end subroutine test_tcxc_core_xpot
+
 
 subroutine test_tcxc_j0_12a_12e
   implicit none
@@ -91,12 +115,26 @@ subroutine test_tcxc_adapt_grid12aj_OMP_vs_BLAS
   double precision :: difference
 
   write(*,*) 
-  write(*,*) "CORE_TCXC_ADAPT_GRID12aj VS. CORE_TCXC_ADAPT_GRID12aj_testing"
+  write(*,*) "CORE_TCXC_ADAPT_GRID12aj VS. CORE_TCXC_ADAPT_GRID12aj_loop"
 
-  difference = sum(abs(core_tcxc_adapt_grid12aj(:,:,:,:) - core_tcxc_adapt_grid12aj_testing(:,:,:,:)))
+  difference = sum(abs(core_tcxc_adapt_grid12aj(:,:,:,:) - core_tcxc_adapt_grid12aj_loop(:,:,:,:)))
 
   write(*,*) "Difference =           ", difference
   write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_grid12aj)
+
+  !integer :: i, j, k, l
+  !do i = 1, ao_num
+  !do j = 1, ao_num
+  !do k = 1, ao_num
+  !do l = 1, ao_num
+  !difference = abs(core_tcxc_adapt_grid12aj(i,j,k,l) - core_tcxc_adapt_grid12aj_loop(i,j,k,l))
+  !if (difference > 1e-5) then
+  !write(*,*) core_tcxc_adapt_grid12aj(i,j,k,l), core_tcxc_adapt_grid12aj_loop(i,j,k,l), difference
+  !end if
+  !end do
+  !end do
+  !end do
+  !end do
 
 end subroutine test_tcxc_adapt_grid12aj_OMP_vs_BLAS
 
@@ -106,9 +144,9 @@ subroutine test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
   double precision :: difference
 
   write(*,*) 
-  write(*,*) "CORE_TCXC_GRID12ej_FULL VS. CORE_TCXC_ADAPT_GRID12aj_testing"
+  write(*,*) "CORE_TCXC_GRID12ej_FULL VS. CORE_TCXC_ADAPT_GRID12aj_loop"
 
-  difference = sum(abs(core_tcxc_grid12ej_full(:,:,:,:) - core_tcxc_adapt_grid12aj_testing(:,:,:,:)))
+  difference = sum(abs(core_tcxc_grid12ej_full(:,:,:,:) - core_tcxc_adapt_grid12aj_loop(:,:,:,:)))
 
   write(*,*) "Difference =           ", difference
   write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_grid12ej_full)
@@ -116,3 +154,16 @@ subroutine test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
 end subroutine test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
 
 
+subroutine test_tcxc_adapt_grid12aj_OMP_vs_j0
+  implicit none
+  double precision :: difference
+
+  write(*,*) 
+  write(*,*) "core_tcxc_adapt_j0_grid12aj VS. CORE_TCXC_ADAPT_GRID12aj_loop"
+
+  difference = sum(abs(core_tcxc_adapt_j0_grid12aj (:,:,:,:) - core_tcxc_adapt_grid12aj_loop(:,:,:,:)))
+
+  write(*,*) "Difference =           ", difference
+  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_adapt_grid12aj_loop)
+
+end subroutine test_tcxc_adapt_grid12aj_OMP_vs_j0

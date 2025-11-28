@@ -86,7 +86,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid12ej_full, (ao_num, ao_num, ao_
                   ! Get value of the j-th orbital at r2p
                   ao_j_r2p = aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
                   ! Update of the integral at each new point r2p
-                  integral = w2p * kernel * j_r1r2p * ao_j_r2p
+                  integral = w2p * kernel * j_r1r2p * ao_j_r2p  ! BETTER RENAMING v_xc_core_ao_j_r2p
                   do l = 1, ao_num
                     ao_l_r2 = aos_in_r_array2(l,i2)
                     do k = 1, ao_num
