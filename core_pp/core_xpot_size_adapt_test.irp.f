@@ -2,6 +2,15 @@ program core_xpot_size_adapt_test
 
   BEGIN_DOC
   ! Testing the core exchange potential computed with different numerical grids
+  ! The results for different grid sizes are accumulated in an output file
+  !
+  ! NB: the difference with the other test program 
+  !   CORE_XPOT_ADAPT_TEST 
+  ! is just that together with grid sizes also the values of 
+  !   MY_ALPHA_KNOWLES
+  !   MY_RADII_UA_AV
+  ! are stored in the output file
+
   END_DOC
 
   implicit none

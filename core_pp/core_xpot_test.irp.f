@@ -1,7 +1,11 @@
 program core_xpot_test
 
   BEGIN_DOC
-  ! Testing the core exchange potential computed with different numerical grids
+  ! Testing the core exchange potential computed with different numerical grids:
+  !  CORE_XPOT_NUMERIC
+  !  CORE_XPOT_NUMERIC_FULL_EXTRA_GRID
+  !  CORE_XPOT_NUMERIC_ADAPT_OLD
+  !  CORE_XPOT_NUMERIC_FULL_ADAPT_GRID
   END_DOC
 
   implicit none
@@ -55,29 +59,27 @@ subroutine test_grids_core_xpot(filename)
   write(*,'(A)') repeat('=', 70)
 
   print*,'CORE_XPOT_NUMERIC'
-!  call compute_dp_array_diff(core_xpot_numeric,            &
-!                           & core_xpot_exact,              &
-!                           & show = .False.,               &
-!                           & row_indx=list_valence_pseudo, &
-!                           & col_indx=list_valence_pseudo, &
-!                           & diff=diff_prun1_prun2)
-!
+  call compute_dp_array_diff(core_xpot_numeric,            &
+                           & core_xpot_exact,              &
+                           & show = .False.,               &
+                           & row_indx=list_valence_pseudo, &
+                           & col_indx=list_valence_pseudo, &
+                           & diff=diff_prun1_prun2)
+
   write(*,'(A)') repeat('=', 70)
 
-!  print*,'CORE_XPOT_NUMERIC_FULL_EXTRA_GRID'
-!  call compute_dp_array_diff(core_xpot_numeric_full_extra_grid, &
-!                           & core_xpot_exact, &
-!                           & show = .False.,              &
-!                           & row_indx=list_valence_pseudo,&
-!                           & col_indx=list_valence_pseudo, &
-!                           & diff=diff_prun1_full2)
-!
-!  write(*,'(A)') repeat('=', 70)
+  print*,'CORE_XPOT_NUMERIC_FULL_EXTRA_GRID'
+  call compute_dp_array_diff(core_xpot_numeric_full_extra_grid, &
+                           & core_xpot_exact, &
+                           & show = .False.,              &
+                           & row_indx=list_valence_pseudo,&
+                           & col_indx=list_valence_pseudo, &
+                           & diff=diff_prun1_full2)
 
+  write(*,'(A)') repeat('=', 70)
 
   diff_prun1_prun2=-1.0
   diff_prun1_full2=-1.0
-
 
   print*,'CORE_XPOT_NUMERIC_ADAPT_OLD'
 
@@ -100,17 +102,6 @@ subroutine test_grids_core_xpot(filename)
 
   write(*,'(A)') repeat('=', 70)
 
-  ! not computed yet
-  !print*,'CORE_XPOT_NUMERIC_PRUN_ADAPT_GRID'
-  !call compute_dp_array_diff(core_xpot_numeric_prun_adapt_grid, &
-  !                         & core_xpot_exact, &
-  !                         & show = .False.,              &
-  !                         & row_indx=list_valence_pseudo,       &
-  !                         & col_indx=list_valence_pseudo, &
-  !                         & diff=diff_prun1_prun3)
-
-  !write(*,'(A)') repeat('=', 70)
-  !diff_prun1_prun3 = -0.123456789
 
 !!!!  logical :: file_exists
 !!!!  if (present(filename)) then

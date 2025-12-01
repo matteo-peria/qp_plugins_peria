@@ -1,38 +1,38 @@
- subroutine prune_adaptive_grid( fixed_grid, float_grid                 &
-                               , fixed_grid_weights, float_grid_weights &
-                               , n_fixed_pts_effective                  &
-                               , n_float_pts_effective                  &
-                               , n_pts_effective_max, pruned_grid)
-  implicit none
-  BEGIN_DOC
-  ! Prunes an adaptive grid
-  END_DOC
-  ! INPUT
-  double precision, intent(in) :: fixed_grid(3,n_points_ang_extra_grid,n_points_rad_extra_grid,nucl_num)
-  double precision, intent(in) :: float_grid(3,n_points_ang_float_grid,n_points_rad_float_grid,1)
-  double precision, intent(in) :: fixed_grid_weights(n_points_ang_extra_grid,n_points_rad_extra_grid,nucl_num)
-  double precision, intent(in) :: float_grid_weights(n_points_ang_float_grid,n_points_rad_float_grid,1)
-  integer, intent(in)          :: n_fixed_pts_effective(nucl_num)
-  integer, intent(in)          :: n_float_pts_effective
-  integer, intent(in)          :: n_pts_effective_max
-  ! OUTPUT
-  double precision, intent(out) :: pruned_grid(3, n_pts_effective_max, nucl_num+1)
-  integer :: i,k,i_nucl
-
-  pruned_grid(:,:,:) = 0.d0
-  i_nucl = 1
-  do i = 1, n_points_rad_float_grid-1
-    do k = 1, n_points_ang_float_grid
-    end do
-  end do
-end subroutine
-
-
-subroutine get_pruned_adaptive_grid()
-  implicit none
-  !call get_adaptive_grid()
-  !call prune_adaptive_grid()
-end subroutine
+! subroutine prune_adaptive_grid( fixed_grid, float_grid                 &
+!                               , fixed_grid_weights, float_grid_weights &
+!                               , n_fixed_pts_effective                  &
+!                               , n_float_pts_effective                  &
+!                               , n_pts_effective_max, pruned_grid)
+!  implicit none
+!  BEGIN_DOC
+!  ! Prunes an adaptive grid
+!  END_DOC
+!  ! INPUT
+!  double precision, intent(in) :: fixed_grid(3,n_points_ang_extra_grid,n_points_rad_extra_grid,nucl_num)
+!  double precision, intent(in) :: float_grid(3,n_points_ang_float_grid,n_points_rad_float_grid,1)
+!  double precision, intent(in) :: fixed_grid_weights(n_points_ang_extra_grid,n_points_rad_extra_grid,nucl_num)
+!  double precision, intent(in) :: float_grid_weights(n_points_ang_float_grid,n_points_rad_float_grid,1)
+!  integer, intent(in)          :: n_fixed_pts_effective(nucl_num)
+!  integer, intent(in)          :: n_float_pts_effective
+!  integer, intent(in)          :: n_pts_effective_max
+!  ! OUTPUT
+!  double precision, intent(out) :: pruned_grid(3, n_pts_effective_max, nucl_num+1)
+!  integer :: i,k,i_nucl
+!
+!  pruned_grid(:,:,:) = 0.d0
+!  i_nucl = 1
+!  do i = 1, n_points_rad_float_grid-1
+!    do k = 1, n_points_ang_float_grid
+!    end do
+!  end do
+!end subroutine
+!
+!
+!subroutine get_pruned_adaptive_grid()
+!  implicit none
+!  !call get_adaptive_grid()
+!  !call prune_adaptive_grid()
+!end subroutine
 
 subroutine get_adaptive_grid( r                                            &
                             , fixed_grid, float_grid                       &
