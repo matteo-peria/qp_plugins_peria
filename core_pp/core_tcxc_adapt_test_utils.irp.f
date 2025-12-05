@@ -3,9 +3,9 @@ BEGIN_PROVIDER [ double precision, core_xpot_adapt_grid2aj, (ao_num, ao_num)]
   BEGIN_DOC
   ! Numerical evaluation of
   ! < l | V_x^{core_pseudo} | j >
-  ! = -\sum_{m\in\text{core}} <lm|1/r12|mk>
-  ! = \int dr_1 \int dr' \phi_l(r_1) V_x(r_1,r') \phi_j(r')
-  ! = - \int dr_1 \int dr' \phi_l(r_1) \sum_{m\in\text{core}} (\phi_m(r_1)\phi_j(r')/|r-r'|) \phi_j(r')
+  ! = -\sum_{m\in\text{core}} < l | \phi_m(1)\phi_m(2)/r12 | k >
+  ! = \int dr_1 \int dr2 \chi_l(r_1) V_x(r_1,r_2) \chi_j(r_2)
+  ! = - \int dr_1 \int dr_2 \chi_l(r_1) \sum_{m\in\text{core}} (\phi_m(r_1)\phi_j(r_2)/|r-r_2|) \chi_j(r_2)
   !
   ! 1st integral is over grid2
   ! 2nd integral is over adaptive grid (floating + extra)
@@ -79,27 +79,33 @@ BEGIN_PROVIDER [ double precision, core_xpot_adapt_grid2aj, (ao_num, ao_num)]
         if (distance.gt.1.d-10) then
           ! Find r'_2 weight from i2p loop-index
           w2p = grid_float_weights(i2p_ang,i2p_rad,1)
-          !write(*,*) "i2p_rad = ", i2p_rad, "; i2p_ang = ", i2p_ang, "; w2p = ", w2p
+
           ! Compute all AOs in r2p 
           call give_all_aos_at_r(r2p, aos_in_r2p)
-
           ! Get the core-MOs at r2p reciclying the newly computed AOs in r2p
           ! and using only the the sub-matrix of core-MOs coefficients
           call dgemv( 'N', n_core_pseudo_orb, ao_num, 1.d0 &
                     , mo_core_coef_notnorm_transp, n_core_pseudo_orb &
                     , aos_in_r2p, 1, 0.d0, mos_core_in_r2p, 1)
-
-
           ! Initialize kernel
           kernel = 0.d0
-          ! Loop over core orbitals to update the kernel
           do m = 1, n_core_pseudo_orb
-            m_core = list_core_pseudo(m)
-            !! Update kernel using all-MOs(r2p) array
-            !kernel -= mos_in_r_array2_omp(m_core,i2) * mos_in_r2p(m_core)    
             ! Update kernel using core-MOs(r2p) array
+            m_core = list_core_pseudo(m)
             kernel -= mos_in_r_array2_omp(m_core,i2) * mos_core_in_r2p(m)    
           enddo
+
+          !! Play safe for the moment and compute all of them
+          !call give_all_mos_at_r(r2p,mos_core_in_r2p)
+          !! Initialize kernel
+          !kernel = 0.d0
+          !! Loop over core orbitals to update the kernel
+          !do m = 1, n_core_pseudo_orb
+          !  m_core = list_core_pseudo(m)
+          !  ! Update kernel using all-MOs(r2p) array
+          !  kernel -= mos_in_r_array2_omp(m_core,i2) * mos_in_r2p(m_core)    
+          !enddo
+
           kernel = kernel / distance
 
           ! Loop over all AO (j-th index, variable is r2p)
