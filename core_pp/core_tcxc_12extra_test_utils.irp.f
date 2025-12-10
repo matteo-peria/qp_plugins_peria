@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, core_xpot_ao_grid2extra, (ao_num, ao_num)]
+ BEGIN_PROVIDER [ double precision, int2b_core_xc_ao_grid2e, (ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! Numerical evaluation of < kl | V^{\text{TC}}_{x,\text{core}}  | ij >
@@ -31,7 +31,7 @@ BEGIN_PROVIDER [ double precision, core_xpot_ao_grid2extra, (ao_num, ao_num)]
   double precision :: distance
     ! Distance for Coulomb integral (exchange)
 
-  core_xpot_ao_grid2extra(:,:) = 0.d0
+  int2b_core_xc_ao_grid2e(:,:) = 0.d0
 
   do i2 = 1, n_points_final_grid2
     !write(*,*) "Loop 2: i2 = ", i2
@@ -67,7 +67,7 @@ BEGIN_PROVIDER [ double precision, core_xpot_ao_grid2extra, (ao_num, ao_num)]
               do l = 1, ao_num
                 !write(*,*) "Loop 5.b.2: l-th AO = ", l
                 ao_l_r2 = aos_in_r_array2(l,i2)
-                core_xpot_ao_grid2extra(l,j) += w2 * ao_l_r2 * integral
+                int2b_core_xc_ao_grid2e(l,j) += w2 * ao_l_r2 * integral
               enddo
       
             enddo
@@ -83,7 +83,7 @@ BEGIN_PROVIDER [ double precision, core_xpot_ao_grid2extra, (ao_num, ao_num)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, core_tcxc_j0_grid12extra, (ao_num, ao_num, ao_num, ao_num)]
+ BEGIN_PROVIDER [ double precision, int3b_ao_overlap_grid1_w_corexc_grid2e, (ao_num, ao_num, ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! TEST-ONLY PROVIDER.
@@ -107,21 +107,21 @@ BEGIN_PROVIDER [ double precision, core_tcxc_j0_grid12extra, (ao_num, ao_num, ao
   integer :: i,j,k,l
 
   ! Initialization
-  core_tcxc_j0_grid12extra(:,:,:,:) = 0.d0
+  int3b_ao_overlap_grid1_w_corexc_grid2e(:,:,:,:) = 0.d0
 
   ! do-loop version of the tensor product
   do j = 1, ao_num
     do l = 1, ao_num
       do k = 1, ao_num
         do i = 1, ao_num
-          core_tcxc_j0_grid12extra(i,k,l,j) = ao_overlap_grid1(i,k) * core_xpot_ao_grid2extra(j,l)
+          int3b_ao_overlap_grid1_w_corexc_grid2e(i,k,l,j) = ao_overlap_grid1(i,k) * int2b_core_xc_ao_grid2e(j,l)
         end do
       end do
     end do
   end do
 
   !! vectorized version of the tensor product
-  !core_tcxc_j0_grid12extra = reshape( ao_overlap_grid1, shape=[ao_num,ao_num,1,1] ) &
+  !int3b_ao_overlap_grid1_w_corexc_grid2e = reshape( ao_overlap_grid1, shape=[ao_num,ao_num,1,1] ) &
   !                     * reshape( core_xpot_grid22, shape=[1,1,ao_num,ao_num] )
 END_PROVIDER
 

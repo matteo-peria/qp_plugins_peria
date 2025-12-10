@@ -2,29 +2,6 @@
 ! used to check that production providers behave well.
 ! These providers are numerical approximations
 
-BEGIN_PROVIDER [ double precision, ao_overlap_mat_grid1, (ao_num, ao_num, n_points_final_grid)]
-  implicit none
-  BEGIN_DOC
-  ! TEST-ONLY PROVIDER.
-  ! AO overlap matrix weighted at different points on grid1
-  ! $$ \chi_k(1)^* \chi_i(1) dr_1 $$
-  ! If you integrate over the 3rd dimension you get the true AO overlap matrix
-  ! (see ao_overlap_grid1)
-  END_DOC
-  integer :: i1, k, i
-  double precision :: w1
-  ao_overlap_mat_grid1(:,:,:) = 0.d0
-  do i1 = 1, n_points_final_grid
-    do k = 1, ao_num
-      do i = 1, ao_num
-        w1 = final_weight_at_r_vector(i1) 
-        ao_overlap_mat_grid1(i,k,i1) = w1 * aos_in_r_array(i,i1) * aos_in_r_array(k,i1)
-      end do
-    end do
-  end do
-END_PROVIDER
-
-
 BEGIN_PROVIDER [ double precision, ao_overlap_grid1, (ao_num, ao_num)]
   implicit none
   BEGIN_DOC
@@ -107,9 +84,9 @@ BEGIN_PROVIDER [ double precision, core_xc_aob_exact, (ao_num, ao_num)]
   double precision, external :: ao_two_e_integral
   core_xc_aob_exact(:,:) = 0.d0
   do j = 1, ao_num
-    do l = 1, ao_num
+    do mu = 1, n_core_pseudo_orb
       do nu = 1, n_core_pseudo_orb
-        do mu = 1, n_core_pseudo_orb
+        do l = 1, ao_num
           core_xc_aob_exact(l,j) -= ao_two_e_integral(l,nu,mu,j) * core_density_matrix(nu,mu)
         enddo
       enddo
@@ -118,7 +95,7 @@ BEGIN_PROVIDER [ double precision, core_xc_aob_exact, (ao_num, ao_num)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, core_tcxc_j0_exact, (ao_num, ao_num, ao_num, ao_num)]
+BEGIN_PROVIDER [ double precision, int3b_ao_overlap_w_corexc_exact, (ao_num, ao_num, ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! TEST-ONLY PROVIDER.
@@ -132,12 +109,12 @@ BEGIN_PROVIDER [ double precision, core_tcxc_j0_exact, (ao_num, ao_num, ao_num, 
   END_DOC
   integer :: i,j,k,l
   ! Initialization
-  core_tcxc_j0_grid12ej_full(:,:,:,:) = 0.d0
+  int3b_ao_overlap_w_corexc_exact(:,:,:,:) = 0.d0
   do j = 1, ao_num
     do l = 1, ao_num
       do k = 1, ao_num
         do i = 1, ao_num
-          core_tcxc_j0_exact(i,k,l,j) = ao_overlap(i,k) * core_xc_aob_exact(j,l)
+          int3b_ao_overlap_w_corexc_exact(i,k,l,j) = ao_overlap(i,k) * core_xc_aob_exact(j,l)
         end do
       end do
     end do

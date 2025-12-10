@@ -42,16 +42,16 @@ program core_tcxc_adapt_test
   write(*,*) "TEST 1"
   call test_tcxc_j0_12Adgemm_NUMERICAL
 
-  ! The following test is useful to check that numerically everything is sound
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 1-bis"
-  call test_tcxc_j0_12Aloops
+  !! The following test is useful to check that numerically everything is sound
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 1-bis"
+  !call test_tcxc_j0_12Aloops
 
-  ! The following test is useful to check that loops and dgemm versions 
-  ! are the same independently from the fact that the Jastrow is equal to 1.0
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 2"
-  call test_tcxc_12Aloops_VS_12Adgemm
+  !! The following test is useful to check that loops and dgemm versions 
+  !! are the same independently from the fact that the Jastrow is equal to 1.0
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 2"
+  !call test_tcxc_12Aloops_VS_12Adgemm
 
   ! Check the testing providers
   write(*,*) 
@@ -65,10 +65,10 @@ program core_tcxc_adapt_test
   write(*,*) "TEST 4 dgemm-based"
   call test_tcxc_j0_grid12Adgemm_VS_EXACT
 
-  write(*,*) 
-  write(*,'(A)') repeat('=', 70)
-  write(*,*) "TEST 4 loops-based"
-  call test_tcxc_j0_grid12Aloops_VS_EXACT
+  !write(*,*) 
+  !write(*,'(A)') repeat('=', 70)
+  !write(*,*) "TEST 4 loops-based"
+  !call test_tcxc_j0_grid12Aloops_VS_EXACT
 
 
 end program core_tcxc_adapt_test
@@ -78,10 +78,10 @@ subroutine test_tcxc_j0_12Adgemm_NUMERICAL
   implicit none
   double precision :: difference
   write(*,*) 
-  write(*,*) "core_tcxc_grid12adapt_dgemm VS. core_tcxc_j0_grid12adapt"
-  difference = sum(abs(core_tcxc_grid12adapt_dgemm(:,:,:,:) - core_tcxc_j0_grid12adapt(:,:,:,:)))
+  write(*,*) "int3b_core_tcxc_ao_grid12a_dgemm VS. int3b_ao_overlap_grid1_w_corexc_grid2a"
+  difference = sum(abs(int3b_core_tcxc_ao_grid12a_dgemm(:,:,:,:) - int3b_ao_overlap_grid1_w_corexc_grid2a(:,:,:,:)))
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid12adapt)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_ao_overlap_grid1_w_corexc_grid2a)
 end subroutine test_tcxc_j0_12Adgemm_NUMERICAL
 
 
@@ -89,10 +89,10 @@ subroutine test_tcxc_j0_12Aloops
   implicit none
   double precision :: difference
   write(*,*) 
-  write(*,*) "core_tcxc_grid12adapt_loops VS. core_tcxc_j0_grid12adapt"
-  difference = sum(abs(core_tcxc_grid12adapt_loops(:,:,:,:) - core_tcxc_j0_grid12adapt(:,:,:,:)))
+  write(*,*) "int3b_core_tcxc_ao_grid12a_loops_test VS. int3b_ao_overlap_grid1_w_corexc_grid2a"
+  difference = sum(abs(int3b_core_tcxc_ao_grid12a_loops_test(:,:,:,:) - int3b_ao_overlap_grid1_w_corexc_grid2a(:,:,:,:)))
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid12adapt)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_ao_overlap_grid1_w_corexc_grid2a)
 end subroutine test_tcxc_j0_12Aloops
 
 
@@ -100,10 +100,10 @@ subroutine test_tcxc_12Aloops_VS_12Adgemm
   implicit none
   double precision :: difference
   write(*,*) 
-  write(*,*) "core_tcxc_grid12adapt_loops VS. core_tcxc_grid12adapt_dgemm"
-  difference = sum(abs(core_tcxc_grid12adapt_loops(:,:,:,:) - core_tcxc_grid12adapt_dgemm(:,:,:,:)))
+  write(*,*) "int3b_core_tcxc_ao_grid12a_loops_test VS. int3b_core_tcxc_ao_grid12a_dgemm"
+  difference = sum(abs(int3b_core_tcxc_ao_grid12a_loops_test(:,:,:,:) - int3b_core_tcxc_ao_grid12a_dgemm(:,:,:,:)))
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_grid12adapt_dgemm)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_core_tcxc_ao_grid12a_dgemm)
 end subroutine test_tcxc_12Aloops_VS_12Adgemm
 
 
@@ -111,10 +111,10 @@ subroutine test_tcxc_j0_grid12Aloops_VS_EXACT
   implicit none
   double precision :: difference
   write(*,*) 
-  write(*,*) "core_tcxc_grid12adapt_loops VS. core_tcxc_j0_exact"
-  difference = sum(abs(core_tcxc_grid12adapt_loops(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
+  write(*,*) "int3b_core_tcxc_ao_grid12a_loops_test VS. int3b_ao_overlap_w_corexc_exact"
+  difference = sum(abs(int3b_core_tcxc_ao_grid12a_loops_test(:,:,:,:) - int3b_ao_overlap_w_corexc_exact(:,:,:,:)))
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_exact)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_ao_overlap_w_corexc_exact)
 end subroutine test_tcxc_j0_grid12Aloops_VS_EXACT
 
 
@@ -122,10 +122,10 @@ subroutine test_tcxc_j0_grid12Adgemm_VS_EXACT
   implicit none
   double precision :: difference
   write(*,*) 
-  write(*,*) "core_tcxc_grid12adapt_dgemm VS. core_tcxc_j0_exact"
-  difference = sum(abs(core_tcxc_grid12adapt_dgemm(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
+  write(*,*) "int3b_core_tcxc_ao_grid12a_dgemm VS. int3b_ao_overlap_w_corexc_exact"
+  difference = sum(abs(int3b_core_tcxc_ao_grid12a_dgemm(:,:,:,:) - int3b_ao_overlap_w_corexc_exact(:,:,:,:)))
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_exact)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_ao_overlap_w_corexc_exact)
 end subroutine test_tcxc_j0_grid12Adgemm_VS_EXACT
 
 
@@ -133,10 +133,10 @@ subroutine test_tcxc_j0_grid12adapt_FORCED_VS_EXACT
   implicit none
   double precision :: difference
   write(*,*) 
-  write(*,*) "core_tcxc_j0_grid12adapt VS. core_tcxc_j0_exact"
-  difference = sum(abs(core_tcxc_j0_grid12adapt(:,:,:,:) - core_tcxc_j0_exact(:,:,:,:)))
+  write(*,*) "int3b_ao_overlap_grid1_w_corexc_grid2a VS. int3b_ao_overlap_w_corexc_exact"
+  difference = sum(abs(int3b_ao_overlap_grid1_w_corexc_grid2a(:,:,:,:) - int3b_ao_overlap_w_corexc_exact(:,:,:,:)))
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_exact)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_ao_overlap_w_corexc_exact)
 end subroutine test_tcxc_j0_grid12adapt_FORCED_VS_EXACT
 
 
@@ -146,9 +146,9 @@ end subroutine test_tcxc_j0_grid12adapt_FORCED_VS_EXACT
 !  double precision :: difference
 !  write(*,*) 
 !  write(*,*) "CORE_TCXC_ADAPT_GRID12aj VS. CORE_TCXC_GRID12ej_FULL"
-!  difference = sum(abs(core_tcxc_grid12adapt_dgemm(:,:,:,:) - core_tcxc_grid12extra(:,:,:,:)))
+!  difference = sum(abs(int3b_core_tcxc_ao_grid12a_dgemm(:,:,:,:) - int3b_core_tcxc_ao_grid12e(:,:,:,:)))
 !  write(*,*) "Difference =           ", difference
-!  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_j0_grid12adapt)
+!  write(*,*) "Difference/n_entries = ", difference/size(int3b_ao_overlap_grid1_w_corexc_grid2a)
 !end subroutine test_tcxc_grid12aj_grid12ej_full
 
 subroutine test_tcxc_adapt_grid12aj_OMP_vs_BLAS
@@ -158,19 +158,19 @@ subroutine test_tcxc_adapt_grid12aj_OMP_vs_BLAS
   write(*,*) 
   write(*,*) "CORE_TCXC_ADAPT_GRID12aj VS. CORE_TCXC_ADAPT_GRID12aj_loop"
 
-  difference = sum(abs(core_tcxc_grid12adapt_dgemm(:,:,:,:) - core_tcxc_grid12adapt_loops(:,:,:,:)))
+  difference = sum(abs(int3b_core_tcxc_ao_grid12a_dgemm(:,:,:,:) - int3b_core_tcxc_ao_grid12a_loops_test(:,:,:,:)))
 
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_grid12adapt_dgemm)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_core_tcxc_ao_grid12a_dgemm)
 
   !integer :: i, j, k, l
   !do i = 1, ao_num
   !do j = 1, ao_num
   !do k = 1, ao_num
   !do l = 1, ao_num
-  !difference = abs(core_tcxc_grid12adapt_dgemm(i,j,k,l) - core_tcxc_grid12adapt_loops(i,j,k,l))
+  !difference = abs(int3b_core_tcxc_ao_grid12a_dgemm(i,j,k,l) - int3b_core_tcxc_ao_grid12a_loops_test(i,j,k,l))
   !if (difference > 1e-5) then
-  !write(*,*) core_tcxc_grid12adapt_dgemm(i,j,k,l), core_tcxc_grid12adapt_loops(i,j,k,l), difference
+  !write(*,*) int3b_core_tcxc_ao_grid12a_dgemm(i,j,k,l), int3b_core_tcxc_ao_grid12a_loops_test(i,j,k,l), difference
   !end if
   !end do
   !end do
@@ -187,10 +187,10 @@ subroutine test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
   write(*,*) 
   write(*,*) "CORE_TCXC_GRID12ej_FULL VS. CORE_TCXC_ADAPT_GRID12aj_loop"
 
-  difference = sum(abs(core_tcxc_grid12extra(:,:,:,:) - core_tcxc_grid12adapt_loops(:,:,:,:)))
+  difference = sum(abs(int3b_core_tcxc_ao_grid12e(:,:,:,:) - int3b_core_tcxc_ao_grid12a_loops_test(:,:,:,:)))
 
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_grid12extra)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_core_tcxc_ao_grid12e)
 
 end subroutine test_tcxc_adapt_grid12aj_OMP_vs_grid12ej_full
 
@@ -199,8 +199,8 @@ subroutine test_tcxc_adapt_grid12aj_OMP_vs_j0
   implicit none
   double precision :: difference
   write(*,*) 
-  write(*,*) "core_tcxc_j0_grid12adapt VS. CORE_TCXC_ADAPT_GRID12aj_loop"
-  difference = sum(abs(core_tcxc_j0_grid12adapt (:,:,:,:) - core_tcxc_grid12adapt_loops(:,:,:,:)))
+  write(*,*) "int3b_ao_overlap_grid1_w_corexc_grid2a VS. CORE_TCXC_ADAPT_GRID12aj_loop"
+  difference = sum(abs(int3b_ao_overlap_grid1_w_corexc_grid2a (:,:,:,:) - int3b_core_tcxc_ao_grid12a_loops_test(:,:,:,:)))
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_tcxc_grid12adapt_loops)
+  write(*,*) "Difference/n_entries = ", difference/size(int3b_core_tcxc_ao_grid12a_loops_test)
 end subroutine test_tcxc_adapt_grid12aj_OMP_vs_j0

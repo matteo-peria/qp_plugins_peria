@@ -35,23 +35,21 @@ program core_xc_aob_test
 end program core_xc_aob_test
 
 
-subroutine test_core_xc_ao_EXACT_vs_FIXED_1ee
-  implicit none
-  double precision :: difference
-  integer :: i, j
-
-  write(*,*) 
-  write(*,*) "core_xpot_eej VS. core_xc_aob_exact "
-  difference = sum(abs(core_xpot_eej(:,:) - core_xc_aob_exact(:,:) ))
-  write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_xc_aob_exact)
-
-  do i = 1, ao_num
-    do j = 1, ao_num
-      write(*,*) core_xpot_eej(i,j), core_xc_aob_exact(i,j) 
-    end do
-  end do
-end subroutine test_core_xc_ao_EXACT_vs_FIXED_1ee
+!subroutine test_core_xc_ao_EXACT_vs_FIXED_1ee
+!  implicit none
+!  double precision :: difference
+!  integer :: i, j
+!  write(*,*) 
+!  write(*,*) "core_xpot_eej VS. core_xc_aob_exact "
+!  difference = sum(abs(core_xpot_eej(:,:) - core_xc_aob_exact(:,:) ))
+!  write(*,*) "Difference =           ", difference
+!  write(*,*) "Difference/n_entries = ", difference/size(core_xc_aob_exact)
+!  do i = 1, ao_num
+!    do j = 1, ao_num
+!      write(*,*) core_xpot_eej(i,j), core_xc_aob_exact(i,j) 
+!    end do
+!  end do
+!end subroutine test_core_xc_ao_EXACT_vs_FIXED_1ee
 
 
 subroutine test_core_xc_ao_EXACT_vs_FIXED
@@ -59,13 +57,13 @@ subroutine test_core_xc_ao_EXACT_vs_FIXED
   double precision :: difference
   integer :: i, j
   write(*,*) 
-  write(*,*) "core_xpot_grid2ej_full VS. core_xc_aob_exact "
-  difference = sum(abs(core_xpot_grid2ej_full(:,:) - core_xc_aob_exact(:,:) ))
+  write(*,*) "int2b_core_xc_ao_grid2e VS. core_xc_aob_exact "
+  difference = sum(abs(int2b_core_xc_ao_grid2e(:,:) - core_xc_aob_exact(:,:) ))
   write(*,*) "Difference =           ", difference
   write(*,*) "Difference/n_entries = ", difference/size(core_xc_aob_exact)
   do i = 1, ao_num
     do j = 1, ao_num
-      write(*,*) core_xpot_grid2ej_full(i,j), core_xc_aob_exact(i,j) 
+      write(*,*) int2b_core_xc_ao_grid2e(i,j), core_xc_aob_exact(i,j) 
     end do
   end do
 end subroutine test_core_xc_ao_EXACT_vs_FIXED
@@ -76,13 +74,13 @@ subroutine test_core_xc_ao_EXACT_vs_ADAPT
   double precision :: difference
   integer :: i, j
   write(*,*) 
-  write(*,*) "core_xpot_adapt_grid2aj VS. core_xc_aob_exact "
-  difference = sum(abs(core_xpot_adapt_grid2aj(:,:) - core_xc_aob_exact(:,:) ))
+  write(*,*) "int2b_core_xc_ao_grid2a VS. core_xc_aob_exact "
+  difference = sum(abs(int2b_core_xc_ao_grid2a(:,:) - core_xc_aob_exact(:,:) ))
   write(*,*) "Difference =           ", difference
   write(*,*) "Difference/n_entries = ", difference/size(core_xc_aob_exact)
   do i = 1, ao_num
     do j = 1, ao_num
-      write(*,*) core_xpot_adapt_grid2aj(i,j), core_xc_aob_exact(i,j) 
+      write(*,*) int2b_core_xc_ao_grid2a(i,j), core_xc_aob_exact(i,j) 
     end do
   end do
 end subroutine test_core_xc_ao_EXACT_vs_ADAPT
@@ -92,10 +90,8 @@ subroutine test_core_xc_ao_FIXED_vs_ADAPT
   implicit none
   double precision :: difference
   write(*,*) 
-  write(*,*) "core_xpot_adapt_grid2aj VS. core_xpot_grid2ej_full"
-  difference = sum(abs(core_xpot_adapt_grid2aj(:,:) - core_xpot_grid2ej_full(:,:)))
+  write(*,*) "int2b_core_xc_ao_grid2a VS. int2b_core_xc_ao_grid2e"
+  difference = sum(abs(int2b_core_xc_ao_grid2a(:,:) - int2b_core_xc_ao_grid2e(:,:)))
   write(*,*) "Difference =           ", difference
-  write(*,*) "Difference/n_entries = ", difference/size(core_xpot_adapt_grid2aj)
+  write(*,*) "Difference/n_entries = ", difference/size(int2b_core_xc_ao_grid2a)
 end subroutine test_core_xc_ao_FIXED_vs_ADAPT
-
-

@@ -1,4 +1,4 @@
-BEGIN_PROVIDER [ double precision, core_tcxc_grid12extra, (ao_num, ao_num, ao_num, ao_num)]
+BEGIN_PROVIDER [ double precision, int3b_core_tcxc_ao_grid12e, (ao_num, ao_num, ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! Numerical evaluation of < kl | V^{\text{TC}}_{x,\text{core}}  | ij >
@@ -34,7 +34,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid12extra, (ao_num, ao_num, ao_nu
     ! Distance for Coulomb integral (exchange)
   integer :: ao_num2
 
-  core_tcxc_grid12extra(:,:,:,:) = 0.d0
+  int3b_core_tcxc_ao_grid12e(:,:,:,:) = 0.d0
 
   if (core_tcxc_loops) then
     do i1 = 1, n_points_final_grid
@@ -93,7 +93,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid12extra, (ao_num, ao_num, ao_nu
                       ao_k_r1 = aos_in_r_array(k,i1)
                       do i = 1, ao_num
                         ao_i_r1 = aos_in_r_array(i,i1)
-                        core_tcxc_grid12extra(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 &
+                        int3b_core_tcxc_ao_grid12e(i,k,l,j) += w1 * ao_i_r1 * ao_k_r1 &
                                                           * w2 * j_r1r2 * ao_l_r2 * integral
                       enddo ! loop i
                     enddo  ! loop k
@@ -113,9 +113,9 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid12extra, (ao_num, ao_num, ao_nu
     ! dgemm session
     ao_num2 = ao_num*ao_num
     call dgemm( 'N', 'T', ao_num2, ao_num2, n_points_final_grid, 1.d0 &
-              , ao_overlap_mat_grid1, ao_num2    &
+              , ao_overlap_grid1_at_r1, ao_num2    &
               , ao_core_xc_mat_grid12e_full, ao_num2    &
-              , 0.d0, core_tcxc_grid12extra, ao_num2 )
+              , 0.d0, int3b_core_tcxc_ao_grid12e, ao_num2 )
   end if
 
 END_PROVIDER
@@ -320,7 +320,7 @@ BEGIN_PROVIDER [ double precision, core_tcxc_grid12ej_prun, (ao_num, ao_num, ao_
     ! dgemm session
     ao_num2 = ao_num*ao_num
     call dgemm( 'N', 'T', ao_num2, ao_num2, n_points_final_grid, 1.d0 &
-              , ao_overlap_mat_grid1, ao_num2    &
+              , ao_overlap_grid1_at_r1, ao_num2    &
               , ao_core_xc_mat_grid12e_pruned, ao_num2    &
               , 0.d0, core_tcxc_grid12ej_prun, ao_num2 )
   end if

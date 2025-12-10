@@ -86,7 +86,7 @@ BEGIN_PROVIDER [ double precision, core_xpot_grid2ej_prun, (ao_num, ao_num)]
 END_PROVIDER
 
 
-BEGIN_PROVIDER [ double precision, core_tcxc_j0_grid12extra_pruned, (ao_num, ao_num, ao_num, ao_num)]
+BEGIN_PROVIDER [ double precision, int3b_ao_overlap_grid1_w_corexc_grid2e_pruned, (ao_num, ao_num, ao_num, ao_num)]
   implicit none
   BEGIN_DOC
   ! TEST-ONLY PROVIDER.
@@ -110,20 +110,20 @@ BEGIN_PROVIDER [ double precision, core_tcxc_j0_grid12extra_pruned, (ao_num, ao_
   integer :: i,j,k,l
 
   ! Initialization
-  core_tcxc_j0_grid12extra_pruned(:,:,:,:) = 0.d0
+  int3b_ao_overlap_grid1_w_corexc_grid2e_pruned(:,:,:,:) = 0.d0
 
   ! do-loop version of the tensor product
   do j = 1, ao_num
     do l = 1, ao_num
       do k = 1, ao_num
         do i = 1, ao_num
-          core_tcxc_j0_grid12extra_pruned(i,k,l,j) = ao_overlap_grid1(i,k) * core_xpot_grid2ej_prun(j,l)
+          int3b_ao_overlap_grid1_w_corexc_grid2e_pruned(i,k,l,j) = ao_overlap_grid1(i,k) * core_xpot_grid2ej_prun(j,l)
         end do
       end do
     end do
   end do
 
   !! vectorized version of the tensor product
-  !core_tcxc_j0_grid12extra_pruned = reshape( ao_overlap_grid1, shape=[ao_num,ao_num,1,1] ) &
+  !int3b_ao_overlap_grid1_w_corexc_grid2e_pruned = reshape( ao_overlap_grid1, shape=[ao_num,ao_num,1,1] ) &
   !                     * reshape( core_xpot_grid22, shape=[1,1,ao_num,ao_num] )
 END_PROVIDER
