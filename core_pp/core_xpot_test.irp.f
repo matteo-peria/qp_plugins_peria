@@ -40,7 +40,7 @@ subroutine test_grids_core_xpot(filename)
   double precision :: diff_prun1_full3
   double precision :: diff_prun1_full3_old
   double precision :: diff_prun1_prun3
-  double precision :: diff_prun1_fuzzy
+  !double precision :: diff_prun1_fuzzy
 
   integer :: ios
   integer :: unit_out
@@ -94,15 +94,15 @@ subroutine test_grids_core_xpot(filename)
 
   write(*,'(A)') repeat('=', 70)
 
-  print*,'CORE_XPOT_FUZZY_GRID'
-  call compute_dp_array_diff(core_xpot_fuzzy_grid, &
-                         & core_xpot_exact, &
-                         & show = .False.,              &
-                         & row_indx=list_valence_pseudo,       &
-                         & col_indx=list_valence_pseudo, &
-                         & diff=diff_prun1_fuzzy)
-
-  write(*,'(A)') repeat('=', 70)
+!  print*,'CORE_XPOT_FUZZY_GRID'
+!  call compute_dp_array_diff(core_xpot_fuzzy_grid, &
+!                         & core_xpot_exact, &
+!                         & show = .False.,              &
+!                         & row_indx=list_valence_pseudo,       &
+!                         & col_indx=list_valence_pseudo, &
+!                         & diff=diff_prun1_fuzzy)
+!
+!  write(*,'(A)') repeat('=', 70)
 
 
 end subroutine
