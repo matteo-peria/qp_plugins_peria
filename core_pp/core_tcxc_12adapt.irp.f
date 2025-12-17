@@ -47,7 +47,6 @@ END_PROVIDER
     call dgemm( 'N', 'T', ao_num2, ao_num2, n_points_final_grid, 1.d0 &
               , ao_overlap_grid1_at_r1, ao_num2    &
               , int2b_core_tcxc_ao_grid2a_at_r1, ao_num2    &
-              !, int2b_core_tcxc_ao_grid2a_at_r1_test, ao_num2    &
               , 0.d0, int3b_core_tcxc_ao_grid12a_dgemm, ao_num2 )
   end if
 

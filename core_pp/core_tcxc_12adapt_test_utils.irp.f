@@ -205,7 +205,9 @@ END_PROVIDER
       do l = 1, ao_num
         do k = 1, ao_num
           do i = 1, ao_num
-            int3b_ao_overlap_grid1_w_corexc_grid2a(i,k,l,j) = ao_overlap_grid1(i,k) * int2b_core_xc_ao_grid2a(j,l)
+            !int3b_ao_overlap_grid1_w_corexc_grid2a(i,k,l,j) = ao_overlap_grid1(i,k) * int2b_core_xc_ao_grid2a(j,l)
+            ! test:
+            int3b_ao_overlap_grid1_w_corexc_grid2a(i,k,l,j) = ao_overlap_grid1(i,k) * int2b_core_xc_ao_grid2a(l,j)
           end do
         end do
       end do
@@ -217,7 +219,9 @@ END_PROVIDER
       do l = 1, ao_num
         do k = 1, ao_num
           do i = 1, ao_num
-            int3b_ao_overlap_grid1_w_corexc_grid2a(i,k,l,j) = ao_overlap_grid1(i,k) * int2b_core_xc_ao_grid2a(j,l)
+            !int3b_ao_overlap_grid1_w_corexc_grid2a(i,k,l,j) = ao_overlap_grid1(i,k) * int2b_core_xc_ao_grid2a(j,l)
+            ! test:
+            int3b_ao_overlap_grid1_w_corexc_grid2a(i,k,l,j) = ao_overlap_grid1(i,k) * int2b_core_xc_ao_grid2a(l,j)
           end do
         end do
       end do

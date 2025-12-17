@@ -332,7 +332,9 @@ end subroutine get_all_adaptive_grid
               !$OMP DO COLLAPSE(2) SCHEDULE(static)
               do j = 1, ao_num
                 do l = 1, ao_num
-                  int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += &
+                  !int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += &
+                  ! test:
+                  int2b_core_tcxc_ao_grid2a_stored_at_r1(l,j,i1) += &
                       &    w2 * j_r1r2 * aos_in_r_array2(l,i2) &
                       & * w2p * j_r1r2p * kernel * all_float_grids_aos(j,i2p_ang,i2p_rad,i2)
                 end do
@@ -346,7 +348,9 @@ end subroutine get_all_adaptive_grid
                 ao_l_r2 = aos_in_r_array2(l,i2)
                 do j = 1, ao_num
                   ao_j_r2p = all_float_grids_aos(j,i2p_ang,i2p_rad,i2)
-                  int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += &
+                  !int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += &
+                  ! test:
+                  int2b_core_tcxc_ao_grid2a_stored_at_r1(l,j,i1) += &
                       &    w2 * j_r1r2 * ao_l_r2 &
                       & * w2p * j_r1r2p * kernel * ao_j_r2p
                 enddo
@@ -407,7 +411,9 @@ end subroutine get_all_adaptive_grid
                 !$OMP DO COLLAPSE(2) SCHEDULE(static)
                 do j = 1, ao_num
                   do l = 1, ao_num
-                    int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += &
+                    !int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += &
+                    ! test:
+                    int2b_core_tcxc_ao_grid2a_stored_at_r1(l,j,i1) += &
                       &   w2 * j_r1r2 * aos_in_r_array2(l,i2)  &
                       & * w2p * j_r1r2p * kernel * aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
                   end do
@@ -422,8 +428,10 @@ end subroutine get_all_adaptive_grid
                   ao_l_r2 = aos_in_r_array2(l,i2)
                   do j = 1, ao_num
                     ao_j_r2p = aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
-                    int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += w2 * j_r1r2 * ao_l_r2 &
-                                                    * w2p * j_r1r2p * kernel * ao_j_r2p
+                    !int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += w2 * j_r1r2 * ao_l_r2 &
+                    ! test:
+                    int2b_core_tcxc_ao_grid2a_stored_at_r1(l,j,i1) += &
+                        & w2 * j_r1r2 * ao_l_r2 * w2p * j_r1r2p * kernel * ao_j_r2p
   
                   enddo
                 enddo
