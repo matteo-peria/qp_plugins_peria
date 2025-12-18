@@ -1,12 +1,18 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ENVELOPE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Couldn't put this stuff in a standalone module because it depends on too many
-! provider that would need to be passed as argument to the functions
+! providers that would need to be passed as argument to the functions
+!
+! This file contains some copies with alternative names of important functions
+! defined in the plugin non_h_ints_mu, which we can't put in NEED to avoid
+! circular dependencies
 
 !double precision function envelope_nucl(r, env_type)
 ! now env_type is a provider so no need to be passed as argument
 double precision function envelope_nucl(r)
-  ! From: jast_deriv_utils.irp.f:197
-  ! double precision function env_nucl(r) 
+  ! TEMPORARY TESTING FUNCTION
+  ! duplicate of:
+  !   double precision function env_nucl(r) 
+  ! from:
+  !   jast_deriv_utils.irp.f:197
   implicit none
   double precision, intent(in) :: r(3)
   !character(:), allocatable :: env_type
@@ -58,7 +64,7 @@ end function
 ! can't have a pure function in irp.f files
 !pure function j_mu_env(r1,r2,mu,env_type)
 double precision function j_mu_env(r1,r2,mu)
-  use jastrow_module, only : j12_mu
+  use jastrow_2e_module, only : j12_mu
   implicit none
   ! INPUT
   double precision, intent(in) :: r1(3)

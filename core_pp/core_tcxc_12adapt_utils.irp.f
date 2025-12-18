@@ -101,6 +101,9 @@ subroutine get_all_adaptive_grid( all_float_grids_points &
 !
 !
 !
+  double precision :: wall0,wall1
+  print*,'computing all floating grid  and AOS/MOS ... '
+  call wall_time(wall0)
   do i2 = 1, n_points_final_grid2
     r2(1:3) = final_grid_points2(1:3,i2)
     w2 = final_weight_at_r_vector2(i2)
@@ -146,6 +149,8 @@ subroutine get_all_adaptive_grid( all_float_grids_points &
       end do
     end do
   end do
+  call wall_time(wall1)
+  print*,'time to compute all floating grid and AOS/MOS :  ',wall1-wall0
 end subroutine get_all_adaptive_grid
 
 
@@ -210,6 +215,11 @@ end subroutine get_all_adaptive_grid
   ! Intermediate variables
   double precision :: v_xc_core_ao_j_r2p
   double precision :: ao_core_xc_r2
+  double precision :: super_weight, weight_tmp
+
+  double precision :: wall0,wall1
+  print*,'providing int2b_core_tcxc_ao_grid2a_stored_at_r1 ... '
+  call wall_time(wall0)
 
   ! Initialize provider
   int2b_core_tcxc_ao_grid2a_stored_at_r1(:,:,:) = 0.d0
@@ -310,6 +320,11 @@ end subroutine get_all_adaptive_grid
                      &* all_float_grids_mos_core(m,i2p_ang,i2p_rad,i2)    
             enddo
             kernel = kernel / distance
+            super_weight = w2 * j_r1r2 * w2p * j_r1r2p * kernel 
+            if(dabs(super_weight).lt.thresh_biorthog_nondiag)then
+             print*,'cycle 1 float'
+             cycle
+            endif
 
             ! Notice the order of the indices: 
             ! - in AO_CORE_XC_MAT_GRID12ADAPT we have (j,l,i1) 
@@ -323,20 +338,25 @@ end subroutine get_all_adaptive_grid
               ! only the first two loops can be OMP-parallelised
 
               !$OMP PARALLEL DEFAULT(NONE) &
-              !$OMP& PRIVATE (j, l) &
+              !$OMP& PRIVATE (j, l,weight_tmp) &
               !$OMP& SHARED ( int2b_core_tcxc_ao_grid2a_stored_at_r1 &
               !$OMP&        , aos_in_r_array2        &
               !$OMP&        , all_float_grids_aos             &
               !$OMP&        , ao_num, i1, i2, i2p_ang, i2p_rad        &
-              !$OMP&        , w1, w2, w2p, j_r1r2, j_r1r2p, kernel)
-              !$OMP DO COLLAPSE(2) SCHEDULE(static)
+              !$OMP&        , super_weight,thresh_biorthog_nondiag)
+!!             !$OMP DO COLLAPSE(2) SCHEDULE(static)
+             !$OMP DO SCHEDULE(dynamic)
               do j = 1, ao_num
+                weight_tmp = super_weight * all_float_grids_aos(j,i2p_ang,i2p_rad,i2)
+                if(dabs(weight_tmp).lt.thresh_biorthog_nondiag)then 
+                 print*,'cycle 2 float'
+                 cycle
+                endif
                 do l = 1, ao_num
                   !int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += &
                   ! test:
                   int2b_core_tcxc_ao_grid2a_stored_at_r1(l,j,i1) += &
-                      &    w2 * j_r1r2 * aos_in_r_array2(l,i2) &
-                      & * w2p * j_r1r2p * kernel * all_float_grids_aos(j,i2p_ang,i2p_rad,i2)
+                      &  weight_tmp *  aos_in_r_array2(l,i2) 
                 end do
               end do
               !$OMP END DO
@@ -389,6 +409,11 @@ end subroutine get_all_adaptive_grid
                        & *mos_in_r_array_extra_full_omp(m_core,i2p_ang,i2p_rad,i2p_nuc)
               enddo
               kernel = kernel/distance
+              super_weight = w2 * j_r1r2 * w2p * j_r1r2p * kernel 
+              if(dabs(super_weight).lt.thresh_biorthog_nondiag)then 
+               print*,'cycle 1 fixed '
+               cycle
+              endif
 
               ! Notice the order of the indices: 
               ! - in AO_CORE_XC_MAT_GRID12ADAPT we have (j,l,i1) 
@@ -402,20 +427,25 @@ end subroutine get_all_adaptive_grid
                 ! only the first two loops can be OMP-parallelised
 
                 !$OMP PARALLEL DEFAULT(NONE) &
-                !$OMP& PRIVATE (j, l) &
+                !$OMP& PRIVATE (j, l, weight_tmp) &
                 !$OMP& SHARED ( int2b_core_tcxc_ao_grid2a_stored_at_r1                         &
                 !$OMP&        , aos_in_r_array2                &
                 !$OMP&        , aos_in_r_array_extra_full                      &
-                !$OMP&        , ao_num, i1, i2, w1, w2, w2p                    &
-                !$OMP&        , i2p_ang,i2p_rad,i2p_nuc, j_r1r2, j_r1r2p, kernel)
-                !$OMP DO COLLAPSE(2) SCHEDULE(static)
+                !$OMP&        , ao_num, i1, i2                    &
+                !$OMP&        , i2p_ang,i2p_rad,i2p_nuc,super_weight,thresh_biorthog_nondiag )
+!!              !$OMP DO COLLAPSE(2) SCHEDULE(static)
+                !$OMP DO SCHEDULE(dynamic)
                 do j = 1, ao_num
+                 weight_tmp = aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc) * super_weight
+                 if(dabs(weight_tmp).lt.thresh_biorthog_nondiag)then 
+                  print*,'cycle 2 fixed '
+                  cycle
+                 endif
                   do l = 1, ao_num
                     !int2b_core_tcxc_ao_grid2a_stored_at_r1(j,l,i1) += &
                     ! test:
                     int2b_core_tcxc_ao_grid2a_stored_at_r1(l,j,i1) += &
-                      &   w2 * j_r1r2 * aos_in_r_array2(l,i2)  &
-                      & * w2p * j_r1r2p * kernel * aos_in_r_array_extra_full(j,i2p_ang,i2p_rad,i2p_nuc)
+                      &   weight_tmp * aos_in_r_array2(l,i2)  
                   end do
                 end do
                 !$OMP END DO
@@ -446,4 +476,6 @@ end subroutine get_all_adaptive_grid
 
     enddo !r2
   end do !r1
+  call wall_time(wall1)
+  print*,'time to provide int2b_core_tcxc_ao_grid2a_stored_at_r1 : ',wall1-wall0
 END_PROVIDER

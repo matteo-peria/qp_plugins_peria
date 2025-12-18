@@ -51,6 +51,9 @@
   integer :: n_fixed_pts_effective(nucl_num)
   integer :: n_float_pts_effective
   integer :: n_pts_effective_max
+  double precision :: wall0,wall1
+  print*,'providing int2b_core_xc_ao_grid2a ...'
+  call wall_time(wall0)
 
 
   ! Initialize floating grid points and weights
@@ -165,6 +168,8 @@
     end do      ! grid 3 fixed
 
   enddo ! grid 2
+  call wall_time(wall1)
+  print*,'time to provide int2b_core_xc_ao_grid2a: ',wall1-wall0
 
 END_PROVIDER
 
@@ -191,6 +196,8 @@ END_PROVIDER
   ! 3rd integral is computed along adaptive grid (floating + extra grid)
   END_DOC
   integer :: i,j,k,l
+  double precision :: wall0,wall1
+  print*,'providing int3b_ao_overlap_grid1_w_corexc_grid2a ...'
 
   ! Initialization
   int3b_ao_overlap_grid1_w_corexc_grid2a(:,:,:,:) = 0.d0
@@ -227,6 +234,8 @@ END_PROVIDER
       end do
     end do
   end if
+  call wall_time(wall1)
+  print*,'time to provide int3b_ao_overlap_grid1_w_corexc_grid2a : ',wall1-wall0
 
 END_PROVIDER
 

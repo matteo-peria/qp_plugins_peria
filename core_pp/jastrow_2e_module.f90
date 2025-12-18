@@ -1,4 +1,7 @@
-module jastrow_module
+module jastrow_2e_module
+  ! This module is a mirror of procedures contained in
+  ! non_h_ints_mu/jast_deriv_utils.irp.f
+  ! 
   implicit none
 
   include 'constants.include.F'
@@ -8,6 +11,7 @@ module jastrow_module
 
 pure function j12_mu(r1, r2, mu)
   !BEGIN_DOC
+  ! Copy of 
   ! $$  j(r1,r2;mu) 
   !   = u(r12;mu)
   !   = 1/2 r12 (1 - erf(mu r12)) - 1/2 (sqrt(pi) * mu) e^{-(mu*r12)^2}$$
@@ -86,5 +90,4 @@ function grad1_j12(r1,r2,mu) result(grad)
 end function
 
 
-end module jastrow_module
-
+end module jastrow_2e_module

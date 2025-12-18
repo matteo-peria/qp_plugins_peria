@@ -34,6 +34,9 @@ END_PROVIDER
   END_DOC
   integer :: ao_num2
 
+  double precision :: wall0,wall1
+  print*,'providing int3b_core_tcxc_ao_grid12a_dgemm ...'
+  call wall_time(wall0)
   int3b_core_tcxc_ao_grid12a_dgemm(:,:,:,:) = 0.d0
 
   ao_num2 = ao_num*ao_num
@@ -49,6 +52,9 @@ END_PROVIDER
               , int2b_core_tcxc_ao_grid2a_at_r1, ao_num2    &
               , 0.d0, int3b_core_tcxc_ao_grid12a_dgemm, ao_num2 )
   end if
+   
+  call wall_time(wall1)
+  print*,'time to provide int3b_core_tcxc_ao_grid12a_dgemm : ',wall1-wall0
 
 
 END_PROVIDER
