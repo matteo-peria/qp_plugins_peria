@@ -14,7 +14,7 @@ program tc_compare_2e_integ
     call get_command_argument(1, filename)
     call test_grids_tc_integ(trim(filename))
   else
-    call test_grids_tc_integ()
+    call test_grids_tc_integ('')
   end if
 
 end program tc_compare_2e_integ
@@ -25,7 +25,7 @@ subroutine test_grids_tc_integ(filename)
   use io_test_interface
   implicit none
 
-  character(len=*), intent(in), optional :: filename
+  character(len=*), intent(in) :: filename
   character(len=100) :: output
 
   double precision :: diff_adapt_exact

@@ -76,7 +76,7 @@ end subroutine get_grad1_u12_on_full_grid2
 
 
 subroutine get_grad1_j12_on_full_grid2(r1, n_nuc, n_rad, n_ang, grid2, grad_vect)
-  use jastrow_module, only : grad1_j12
+  use jastrow_2e_module, only : grad1_j12
   BEGIN_DOC
   !
   !  d/dx1 j_2e(1,2)

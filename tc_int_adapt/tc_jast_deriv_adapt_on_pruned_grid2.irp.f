@@ -43,7 +43,7 @@ end subroutine get_grad1_u12_on_pruned_grid2
 
 
 subroutine get_grad1_j12_on_pruned_grid2(r1, ngrid2, grid2, grad_vect)
-  use jastrow_module, only : grad1_j12
+  use jastrow_2e_module, only : grad1_j12
   BEGIN_DOC
   ! Temporary test of GET_GRAD1_J12_ON_GRID2 on the normal grid2
   END_DOC
