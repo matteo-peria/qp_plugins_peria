@@ -16,7 +16,7 @@ program core_xpot_adapt_test
     call get_command_argument(1, filename)
     call test_grids_core_xpot_adapt(trim(filename))
   else
-    call test_grids_core_xpot_adapt()
+    call test_grids_core_xpot_adapt('')
   end if
 
 end program
@@ -27,7 +27,7 @@ subroutine test_grids_core_xpot_adapt(filename)
   use io_test_interface
   implicit none
 
-  character(len=*), intent(in), optional :: filename
+  character(len=*), intent(in) :: filename
   character(len=100) :: output
 
   double precision :: diff_prun1_full3
@@ -51,7 +51,7 @@ subroutine test_grids_core_xpot_adapt(filename)
   write(*,'(A)') repeat('=', 70)
 
   logical :: file_exists
-  if (present(filename)) then
+  if (len_trim(filename) > 0) then
     output = trim(filename)//'/core_xpot_adapt.out'
     inquire(file=output, exist=file_exists)
     
@@ -117,7 +117,7 @@ subroutine test_grids_core_xpot_adapt(filename)
           & + n_points_rad_extra_grid*n_points_ang_extra_grid),  &
       & diff_prun1_full3
 
-  if (present(filename).and.ios==0) then
+  if (len_trim(filename) > 0 .and. ios==0) then
     close(unit_out)
   end if
 

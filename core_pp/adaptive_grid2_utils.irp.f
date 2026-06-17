@@ -52,7 +52,7 @@
     enddo
   enddo
 
-  if (silence_floating_grid.eq..true.) then
+  if (silence_floating_grid.eqv..true.) then
     ! No becke weights are computed for the floating grid, which is suppressed
   else
     ! Loop over all points belonging to ghost-atom grid (floating grid)
@@ -117,7 +117,7 @@ subroutine get_becke_functions_general_grid2(r, rp, slater_inter_per_input, n_we
 
  !print*, "N_WEIGHTS ===================================", n_weights
 
- if (silence_floating_grid.eq..true.) then
+ if (silence_floating_grid.eqv..true.) then
    weights(1) = 0.d0
 !!   print*, "Floating grid has been silenced. Now the adaptive_grid should be equal to extra_grid"
 !!   fixed_grid_start = 1
@@ -254,7 +254,7 @@ double precision function cell_function_becke_general_adapt_grid2(r             
     !write(*,'(I4,100E13.4)'), j, r_j, mu_ij, nu_ij, cell_function_becke_general_adapt_grid2
   enddo
 
-  if (silence_floating_grid.eq..false.) then
+  if (silence_floating_grid.eqv..false.) then
     ! Contribute coming from the extra atom positioned at 'rp'
     r_j = dsqrt(sum((r(1:3) - rp(1:3)) * (r(1:3) - rp(1:3)))) 
     ! Internuclear distance

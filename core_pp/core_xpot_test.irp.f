@@ -21,7 +21,7 @@ program core_xpot_test
     call get_command_argument(1, filename)
     call test_grids_core_xpot(trim(filename))
   else
-    call test_grids_core_xpot()
+    call test_grids_core_xpot('')
   end if
 
 end program
@@ -32,7 +32,7 @@ subroutine test_grids_core_xpot(filename)
   use io_test_interface
   implicit none
 
-  character(len=*), intent(in), optional :: filename
+  character(len=*), intent(in) :: filename
   character(len=100) :: output
 
   double precision :: diff_prun1_full2

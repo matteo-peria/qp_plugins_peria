@@ -10,7 +10,7 @@ program print_grid
     call get_command_argument(1, filepath)
     call main(trim(filepath))
   else
-    call main()
+    call main('')
   end if
 
 end program print_grid
@@ -19,7 +19,7 @@ end program print_grid
 subroutine main(path)
   use iso_fortran_env, only: output_unit
   implicit none
-  character(len=*), intent(in), optional :: path
+  character(len=*), intent(in) :: path
   character(len=19) :: filename
   character(len=100) :: filepath
   !
@@ -30,7 +30,7 @@ subroutine main(path)
 
   write(filename, '("rad", I4.4, "_ang", I4.4, ".out")') my_n_pt_r_grid, my_n_pt_a_grid
 
-  if (present(path)) then
+  if (len_trim(path) > 0) then
     filepath = trim(path)//'/'//filename
     open(newunit=unit_out, & 
        & file=filepath,    & 
@@ -54,7 +54,7 @@ subroutine main(path)
     end do
   end do
 
-  if (present(path).and.ios==0) then
+  if (len_trim(path) > 0 .and. ios==0) then
     close(unit_out)
   end if
 

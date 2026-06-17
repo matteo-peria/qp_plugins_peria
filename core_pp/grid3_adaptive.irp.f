@@ -71,7 +71,7 @@
 
   print*, "managing floating grid weights"
   ! Floating grid weights (grid points of extra ghost-atom)
-  if (silence_floating_grid.eq..true.) then
+  if (silence_floating_grid.eqv..true.) then
     ! no contribution from floating grid
     float_grid_weights(:,:,:) = 0.d0
   else

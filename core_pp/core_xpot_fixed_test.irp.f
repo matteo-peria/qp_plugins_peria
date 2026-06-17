@@ -16,7 +16,7 @@ program core_xpot_fixed_test
     call get_command_argument(1, filename)
     call test_grids_core_xpot_fixed(trim(filename))
   else
-    call test_grids_core_xpot_fixed()
+    call test_grids_core_xpot_fixed('')
   end if
 
 end program
@@ -27,7 +27,7 @@ subroutine test_grids_core_xpot_fixed(filename)
   use io_test_interface
   implicit none
 
-  character(len=*), intent(in), optional :: filename
+  character(len=*), intent(in) :: filename
   character(len=100) :: output
 
   double precision :: diff_prun1_full2
@@ -64,7 +64,7 @@ subroutine test_grids_core_xpot_fixed(filename)
 
 
   logical :: file_exists
-  if (present(filename)) then
+  if (len_trim(filename) > 0) then
     output = trim(filename)//'/core_xpot_fixed.out'
     inquire(file=output, exist=file_exists)
     
@@ -129,7 +129,7 @@ subroutine test_grids_core_xpot_fixed(filename)
       & nucl_num*(n_points_final_grid + n_points_extra_final_grid), &
       & diff_prun1_prun2
 
-  if (present(filename).and.ios==0) then
+  if (len_trim(filename) > 0 .and. ios==0) then
     close(unit_out)
   end if
 
