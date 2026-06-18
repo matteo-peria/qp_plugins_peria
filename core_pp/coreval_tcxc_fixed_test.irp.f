@@ -31,7 +31,8 @@ program coreval_tcxc_fixed_test
   !difference = sum(abs(int3b_core_tcxc_ao_grid12a_dgemm(:,:,:,:) - int3b_core_tcxc_ao_grid12e(:,:,:,:)))
   !provide int3b_core_tcxc_ao_grid12e
 
-  provide core_tcxc_grid12ej_prun
+  provide  int3b_core_tcxc_ao_grid12e 
+  !provide core_tcxc_grid12ej_prun
 
 
 end program coreval_tcxc_fixed_test
